@@ -1,3 +1,11 @@
+/* ============================================================================
+ * VENDORED from storypixel/dodgeball-play-animator (play-animator.js).
+ * CANONICAL SOURCE — DO NOT EDIT HERE.
+ * The DBN spec/parser and the render engine evolve in the animator repo first;
+ * re-vendor this file after upstream changes. Editing it here forks the
+ * notation, which is exactly what this project must not do.
+ * Upstream: https://github.com/storypixel/dodgeball-play-animator
+ * ========================================================================== */
 /* Dodgeball Play Animator — self-contained, no dependencies.
  *
  * One engine, mounted as many times as you like. Each mount renders an

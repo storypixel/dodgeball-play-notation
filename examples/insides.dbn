@@ -1,0 +1,9 @@
+[Id "insides"]
+[Play "Insides"]
+[Badge "4-ball offense"]
+[Call "\"Insides on 5\""]
+[Desc "The two middle players pick one target — here the 5th from the left. Hits from the center are hard to read until the ball is already gone."]
+DBF "U:1(14,90)*,2(22,90),3(30,90),4(38,90),5(46,90)*,6(54,90)*,7(62,90),8(70,90),9(78,90),10(86,90)* / T:1(14,10),2(22,10),3(30,10)*,4(38,10),5(46,10),6(54,10),7(62,10),8(70,10)*,9(78,10),10(86,10)"
+
+1. {Set — corners fake} :0.8  U1? U10?
+2. {Insides on 5} :1.1  U5@T5!~-22 U6@T5!~-14

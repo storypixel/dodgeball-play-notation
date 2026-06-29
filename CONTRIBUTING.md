@@ -1,38 +1,52 @@
 # Contributing
 
-This project is in an early **draft** phase. The most valuable contribution right
-now is feedback on the **notation design itself** — see the open questions at the
-end of [`SPEC.md`](SPEC.md). If a line of notation doesn't read the way you'd say
-the play out loud, that's a bug worth filing.
+This repo is the **standalone editor** for DBN. DBN itself — the notation spec
+and parser — is **canonical and lives elsewhere**. That split drives every rule
+here.
 
-## Repo conventions
+## The one hard rule: DBN is canonical, do not fork it
 
-- **No build step, no runtime dependencies.** The parser is plain JS that runs in
-  both the browser and Node. Keep it that way unless there's a strong reason.
-- **The engine in `vendor/` is vendored, not forked.** Don't edit
-  `vendor/play-animator.js`. If the renderer needs changes, they belong upstream
-  in [storypixel/dodgeball-play-animator][engine]; re-vendor afterward.
-- **Examples must round-trip.** Every `.play` in `examples/` should parse without
-  error and render in the editor.
+- `vendor/dbn.js` (parser) and `vendor/play-animator.js` (engine) are **vendored
+  copies**. Do **not** edit them here. Notation or engine changes go to
+  [storypixel/dodgeball-play-animator][engine] **first**, then re-vendor:
+  ```bash
+  cp ~/…/dodgeball-play-animator/{dbn.js,play-animator.js,NOTATION.md} ./vendor/  # then re-add the vendor header
+  ```
+- `NOTATION.md` here is a **synced copy** of the canonical spec — edit it
+  upstream, not here.
+- Found a parser bug or want a new DBN feature? **Route it through the fleet**
+  (california-tom / zerocool) so the notation evolves in one place. Don't patch
+  around it in the editor.
+
+## What you can change here
+
+The editor and its docs:
+
+- `src/editor.js` — UI + the `window.DBNEditor` automation API
+- `src/dbn-headless.js` — pure-Node DBN → JSON / static SVG
+- `index.html`, docs (`README`, `GLOSSARY`, `DRIVING`), `examples/*.dbn`
+
+## Conventions
+
+- **No build step, no runtime deps.** Plain JS that runs in the browser and Node.
+- **Examples must stay faithful.** Every `examples/*.dbn` must parse and, where a
+  golden exists in `tests/fixtures/plays.js`, compile byte-identical to it.
+- **Agent-drivability is a feature, not a nicety.** Keep `data-testid` + ARIA on
+  every control, the `window.DBNEditor` surface stable, and the deep-link params
+  working. If you add a control, give it a testid and document it in
+  [`DRIVING.md`](DRIVING.md).
+
+## Running
+
+```bash
+python3 -m http.server 8770   # → http://localhost:8770/index.html
+node tests/parse.test.js      # parity (vs golden plays.js) + headless smoke
+```
 
 ## Adding an example play
 
-1. Write `examples/<name>.play` following [`SPEC.md`](SPEC.md).
-2. Add it to the dropdown in `src/editor.html`.
-3. Load it in the editor and confirm it parses and animates.
-
-## Running locally
-
-```bash
-python3 -m http.server 8770
-open http://localhost:8770/src/editor.html
-```
-
-To sanity-check the parser headlessly:
-
-```bash
-node -e 'const {parsePlay}=require("./src/parser.js");
-  console.log(JSON.stringify(parsePlay(require("fs").readFileSync("examples/kill-left.play","utf8")),null,2))'
-```
+1. Write `examples/<id>.dbn` (see [`NOTATION.md`](NOTATION.md)). Use `[Id "<id>"]`.
+2. Add it to the `example-select` dropdown in `index.html`.
+3. `node tests/parse.test.js` — it must parse; if `<id>` has a golden, it must match.
 
 [engine]: https://github.com/storypixel/dodgeball-play-animator

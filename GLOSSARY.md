@@ -1,52 +1,92 @@
-# Glossary — Dodgeball Play Notation
+# Glossary — DBN (Dodgeball Notation)
 
-Every keyword in the notation and what it compiles to. See [`SPEC.md`](SPEC.md)
-for the full grammar. This is a DRAFT — names may change.
+Every DBN token and what it maps to. The authoritative spec is
+[`NOTATION.md`](NOTATION.md) (synced from the canonical
+[animator repo](https://github.com/storypixel/dodgeball-play-animator)); this is
+the quick lookup.
 
 ## Court & coordinates
 
 | Term | Meaning |
 |------|---------|
-| **us** / **them** | the two teams. `us` is the bottom half of the diagram, `them` the top. |
-| **seat / player number** | `1` = far left … `N` = far right, per team. `us 3` = our 3rd-from-left. |
-| **x** | court width, `0` (left) … `100` (right). |
-| **y** | court depth, `0` (their back line) … `50` (center line) … `100` (our back line). |
-| **coord** | `x,y` — e.g. `54,68`. Only needed for an explicit `move`. |
+| **file** | column `a`–`j`, left → right (10 columns). |
+| **rank** | row `1`–`10`, bottom → top. Rank `1` = OUR back line, rank `10` = THEIR back line; center line sits between 5 and 6. |
+| **square** | `file`+`rank`, e.g. `f6`. Maps to the engine's 0–100 space: `x=(fileIdx+0.5)*10`, `y=(10-rank+0.5)*10`. |
+| **`(x,y)` escape** | raw 0–100 coords for off-grid precision, e.g. `U6-(54,68)`. |
 
-## Structure
+## Pieces
 
-| Token | Meaning | Engine field |
-|-------|---------|--------------|
-| `# Name` | play name (first line, required) | `name`, `id` |
-| `call: "…"` | what the captain yells | `call` |
-| `badge: …` | short category tag | `badge` |
-| `desc: …` | one- or two-sentence description | `desc` |
-| `setup:` | begins the starting-position block | `setup` |
-| `> Label (1.1)` | a step/beat with a label and duration in seconds | `steps[]`, `.label`, `.dur` |
-| `//` | comment to end of line | — |
+| Token | Meaning |
+|-------|---------|
+| `U1`…`U10` | US players. `U1` = our far-left, `U10` = far-right. |
+| `T1`…`T10` | THEM players. |
+| `*` (suffix) | the player is **loaded** (holding a ball), e.g. `U1*`. |
+| `bU` / `bT` / `bN` | a loose ball, owner = ours / theirs / neutral (on the line). |
 
-## Setup statements
+## DBF — the setup string
 
-| Statement | Meaning | Engine field |
-|-----------|---------|--------------|
-| `us: N` / `them: N` | place N players, evenly spread (1 = far left) | `setup.us` / `setup.them` |
-| `… balls a b c` | those seat numbers start holding a ball | `{...,ball:true}` |
-| `ball <id> at x,y <side>` | a loose ball on the floor, owned by a side | `setup.balls[]` |
+One line, three `/`-separated groups; entries comma-separated.
 
-## Action verbs (inside a step)
+```
+DBF "U:<player><square>[*],…  /  T:…  /  B:<ballTag><square>,…"
+```
 
-Each action line starts with an actor (`us N` or `them N`; multiple seats like
-`us 5 6 7` apply the action to each).
+| Group | Holds |
+|-------|-------|
+| `U:` | our players and their squares (`*` = loaded) — **required** |
+| `T:` | their players — **required** |
+| `B:` | loose balls (`bU`/`bT`/`bN` + square) — optional |
 
-| Verb | Form | Meaning | Engine field |
-|------|------|---------|--------------|
-| `throw` | `us 1 throw them 3` | throw at an opponent (out) | `throws[]` |
-| `curve` | `… throw them 3, curve -26` | side-arc on the preceding throw (sign = direction) | `throws[].curve` |
-| `pass` | `us 10 pass us 6` | hand/toss a ball to a teammate | `passes[]` |
-| `move` | `us 6 move 54,68` | glide to a coordinate by step's end | `moves[].to` |
-| `move … rush` | `us 9 move rush` | move straight up to the center line, keeping current x | `moves[]` |
-| `fake` | `us 5 fake` | pump-fake (freeze defenders) | `fakes[]` |
-| `grab` | `us 10 grab uR2 uR3` | pick up loose ball(s) by id | `grabs[]` |
+## Tags (metadata, before DBF)
 
-Chain actions for one actor with commas on a single line:
-`us 10 move 92,54, grab uR2 uR3`.
+| Tag | Maps to |
+|-----|---------|
+| `[Play "…"]` | play name |
+| `[Id "…"]` | stable id (else slugified from name) |
+| `[Badge "…"]` | category tag |
+| `[Call "…"]` | the captain's call (escape inner quotes: `[Call "\"Kill left\""]`) |
+| `[Desc "…"]` | description |
+
+## Movetext — beats
+
+```
+<n>. {label} :dur  <action> <action> …
+```
+
+| Part | Meaning |
+|------|---------|
+| `<n>.` | beat number (a step in the animation) |
+| `{label}` | optional caption shown under the court |
+| `:dur` | optional duration in seconds (default `1.0`) |
+| actions | space-separated; **simultaneous** within the beat |
+
+Separate beats by newline or `;`.
+
+## Action verbs
+
+| Verb | Token | Meaning |
+|------|-------|---------|
+| run / move | `U3-f6` | player runs to a square |
+| grab (nearest) | `U9*` | pick up the nearest loose ball → loaded |
+| grab (specific) | `U9*bN h6` | pick up the named loose ball |
+| run + grab | `U10-g6*` | move there and grab in one beat |
+| pass | `U10>U6` | hand/toss to a teammate |
+| throw | `U1@T3` | throw at an opponent |
+| fake | `U3?` | pump-fake, no release |
+| block | `T3#` | deflect an incoming throw with a held ball |
+| catch | `T3^` | catch an incoming throw |
+| dodge | `T3%` | evade an incoming throw |
+| out | `T3X` | eliminated (not from a tracked throw) |
+| return | `+U4` | a catch brings a teammate back in |
+
+## Throw outcomes (suffix on the throw)
+
+| Token | Result |
+|-------|--------|
+| `U1@T3!` | hit — T3 is out |
+| `U1@T3^` | caught — **thrower U1 is out**, THEM returns one |
+| `U1@T3%` | dodged — nobody out |
+| `U1@T3#` | blocked — nobody out |
+| `U6@T2!~-20` | append `~<deg>` for a curved arc (signed) |
+
+Omit the outcome and the throw is treated as unresolved (arc only).
