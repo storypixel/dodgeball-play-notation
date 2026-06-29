@@ -49,6 +49,12 @@
         <option value="insides">Insides</option>
       </select>
       <button id="render-btn" data-testid="render-button" aria-label="Render the notation">Render ⌘↵</button>
+      <label for="speed-select">Speed:</label>
+      <select id="speed-select" data-testid="speed-select" aria-label="Animation speed">
+        <option value="1">1×</option>
+        <option value="2" selected>2× (default)</option>
+        <option value="3">3×</option>
+      </select>
     </div>
     <textarea id="dbn-input" data-testid="dbn-input" aria-label="DBN notation input"
       spellcheck="false" placeholder='[Play "My Play"]&#10;DBF "U:1c1*,... / T:1c10,..."&#10;&#10;1. {Set} U3?&#10;2. {Throw} U1@T3!'></textarea>

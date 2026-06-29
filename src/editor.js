@@ -49,7 +49,7 @@
       var host = document.createElement("div");
       els.stage.appendChild(host);
       var autoplay = qparam("autoplay") === "1";
-      state.mount = window.DodgeballPlay.mount(host, play, { autoplay: autoplay, loop: qparam("loop") === "1" });
+      state.mount = window.DodgeballPlay.mount(host, play, { autoplay: autoplay, loop: qparam("loop") === "1", speed: currentSpeed() });
       var beats = (play.steps || []).length;
       setStatus("ok", "✓ " + (play.name || "play") + " — " + beats + " beat" + (beats === 1 ? "" : "s") + " parsed.");
       return play;
@@ -64,6 +64,13 @@
   function beatHint(e) {
     var m = e && e.message && /beat\s+(\d+)/i.exec(e.message);
     return m ? parseInt(m[1], 10) : null;
+  }
+
+  // playback speed: the speed dropdown, else ?speed=, else engine default (2x)
+  function currentSpeed() {
+    if (els.speedSel && els.speedSel.value) return parseFloat(els.speedSel.value) || 2;
+    var q = parseFloat(qparam("speed"));
+    return q > 0 ? q : 2;
   }
 
   function load(text) {
@@ -107,6 +114,15 @@
     els.errorPanel = $("error-panel");
     els.renderBtn = $("render-btn");
     els.exampleSel = $("example-select");
+    els.speedSel = $("speed-select");
+
+    // ?speed= deep-link presets the dropdown
+    var qs = parseFloat(qparam("speed"));
+    if (els.speedSel && qs > 0) {
+      var opt = Array.prototype.find.call(els.speedSel.options, function (o) { return parseFloat(o.value) === qs; });
+      if (opt) els.speedSel.value = String(qs);
+    }
+    if (els.speedSel) els.speedSel.addEventListener("change", render);
 
     if (els.renderBtn) els.renderBtn.addEventListener("click", render);
     if (els.input) {

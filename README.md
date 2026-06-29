@@ -41,8 +41,11 @@ An agent can run this editor headlessly, three ways:
 See **[DRIVING.md](DRIVING.md)** for copy-paste examples (30 seconds to drive it).
 
 Every control also carries a stable `data-testid` + ARIA label for browser
-automation: `dbn-input`, `render-button`, `example-select`, `status`,
-`error-panel`, `preview-stage`.
+automation: `dbn-input`, `render-button`, `example-select`, `speed-select`,
+`status`, `error-panel`, `preview-stage`.
+
+Plays animate at **2× by default** (realistic pace). Change it with the speed
+control (1× / 2× / 3×) or `?speed=<n>`.
 
 ## Try it locally
 

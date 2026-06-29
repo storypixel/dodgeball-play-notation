@@ -87,6 +87,7 @@ Every control has a `data-testid` and an ARIA label:
 | `dbn-input` | notation textarea |
 | `render-button` | render trigger |
 | `example-select` | example dropdown |
+| `speed-select` | playback speed (1× / 2× / 3×) |
 | `status` | status line (`role="status"`) |
 | `error-panel` | parse-error panel (`role="alert"`, `hidden` when valid) |
 | `preview-stage` | container holding the rendered `<svg>` |
@@ -99,6 +100,7 @@ Every control has a `data-testid` and an ARIA label:
 | `?play=<id>` | load `examples/<id>.dbn` (e.g. `kill-left`, `pitch-back`, `insides`) |
 | `?autoplay=1` | start the animation immediately |
 | `?loop=1` | loop the animation |
+| `?speed=<n>` | playback multiplier (default `2`; e.g. `1` for the old pace, `3` faster) |
 
 ---
 
