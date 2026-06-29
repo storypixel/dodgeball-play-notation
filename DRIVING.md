@@ -3,7 +3,7 @@
 This editor is built to be run by an agent with **no human clicking**. Three
 paths, fastest first. Everything below is copy-paste.
 
-> Live URL: `https://storypixel.github.io/dodgeball-play-notation/`
+> Live URL: `https://iamnotsam.com/dodgeball-play-notation/`
 
 ---
 
@@ -26,7 +26,7 @@ add `?autoplay=1` to start the animation.
 const dbn = `[Play "Quick Demo"]
 DBF "U:1c1*,2d1 / T:1c10,2d10"
 1. {Throw} U1@T2!~-15`;
-const url = "https://storypixel.github.io/dodgeball-play-notation/"
+const url = "https://iamnotsam.com/dodgeball-play-notation/"
           + "?dbn=" + encodeURIComponent(dbn) + "&autoplay=1";
 // open `url` in any browser / headless browser — done.
 ```
@@ -43,7 +43,7 @@ take_screenshot()
 ### B. Via the window API — load into an already-open editor
 
 ```
-new_page("https://storypixel.github.io/dodgeball-play-notation/")
+new_page("https://iamnotsam.com/dodgeball-play-notation/")
 evaluate_script((dbn) => {
   window.DBNEditor.load(dbn);          // parse + render
   return {

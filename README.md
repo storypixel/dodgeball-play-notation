@@ -3,7 +3,7 @@
 Write a dodgeball play in **DBN** (Dodgeball Notation) and watch it animate.
 Deep-linkable, and built to be driven by an agent with zero human clicking.
 
-**▶ Live editor: https://storypixel.github.io/dodgeball-play-notation/**
+**▶ Live editor: https://iamnotsam.com/dodgeball-play-notation/**
 
 ```
 [Play "Kill Left"]
