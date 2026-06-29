@@ -1,0 +1,22 @@
+{
+  "name": "dodgeball-play-notation",
+  "version": "0.1.0",
+  "description": "Write a dodgeball play as plain text; watch it animate. A line-oriented notation is the source of truth, compiled to data the dodgeball-play-animator engine renders.",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "src/parser.js",
+  "scripts": {
+    "test": "node tests/parse.test.js",
+    "serve": "python3 -m http.server 8770"
+  },
+  "files": [
+    "src/parser.js",
+    "SPEC.md",
+    "GLOSSARY.md"
+  ],
+  "keywords": ["dodgeball", "notation", "dsl", "playbook", "animation"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/storypixel/dodgeball-play-notation.git"
+  }
+}

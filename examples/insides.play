@@ -1,0 +1,15 @@
+# Insides
+call:  "Insides on 5"
+badge: 4-ball offense
+desc:  The two middle players pick one target — here the 5th from the left. Hits from the center are hard to read until the ball is already gone.
+
+setup:
+  us:   10  balls 1 5 6 10   // middle two throw, corners hold
+  them: 10  balls 3 8        // they hold the other 2
+
+> Set — corners fake  (0.8)
+  us 1 10 fake
+
+> Insides on 5  (1.1)
+  us 5 throw them 5, curve -22
+  us 6 throw them 5, curve -14

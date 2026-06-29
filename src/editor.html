@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dodgeball Play Notation — Editor</title>
+<style>
+  :root { --bg:#0e1014; --panel:#16191f; --line:#2a2f3a; --text:#e6e8ec; --muted:#8b93a1; --us:#1f6feb; --err:#e5484d; --ok:#36b37e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:baseline; gap:12px; }
+  header h1 { font-size:16px; margin:0; font-weight:650; }
+  header .sub { color:var(--muted); font-size:13px; }
+  header a { color:var(--us); text-decoration:none; }
+  main { display:grid; grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.1fr); gap:0; height:calc(100vh - 52px); }
+  .pane { display:flex; flex-direction:column; min-width:0; }
+  .pane.edit { border-right:1px solid var(--line); }
+  .toolbar { padding:8px 14px; border-bottom:1px solid var(--line); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .toolbar label { color:var(--muted); font-size:13px; }
+  select, button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:7px; padding:5px 10px; font:inherit; cursor:pointer; }
+  textarea { flex:1; resize:none; border:0; outline:0; padding:14px 16px; background:transparent; color:var(--text);
+             font:13.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; tab-size:2; }
+  .status { padding:8px 16px; border-top:1px solid var(--line); font:12.5px/1.4 ui-monospace,monospace; min-height:34px; }
+  .status.ok { color:var(--ok); }
+  .status.err { color:var(--err); }
+  .preview-wrap { flex:1; overflow:auto; padding:18px; }
+  .hint { color:var(--muted); font-size:12.5px; padding:0 16px 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Dodgeball Play Notation</h1>
+  <span class="sub">type a play on the left → watch it on the right ·
+    <a href="../SPEC.md">notation spec</a> ·
+    <a href="../GLOSSARY.md">glossary</a></span>
+</header>
+<main>
+  <section class="pane edit">
+    <div class="toolbar">
+      <label for="ex">Load example:</label>
+      <select id="ex">
+        <option value="">— pick —</option>
+        <option value="kill-left">Kill Left</option>
+        <option value="pitch-back">Pitch Back</option>
+        <option value="insides">Insides</option>
+      </select>
+      <button id="render">Render ⌘↵</button>
+    </div>
+    <textarea id="src" spellcheck="false" placeholder="# My Play&#10;setup:&#10;  us: 10  balls 1 2&#10;  them: 10&#10;&#10;> Throw  (1.0)&#10;  us 1 throw them 1"></textarea>
+    <div id="status" class="status">Ready.</div>
+  </section>
+  <section class="pane">
+    <div class="hint" style="padding-top:12px">Live preview — press play to animate.</div>
+    <div class="preview-wrap"><div id="stage"></div></div>
+  </section>
+</main>
+
+<script src="../vendor/play-animator.js"></script>
+<script src="parser.js"></script>
+<script>
+(function () {
+  var src = document.getElementById("src");
+  var status = document.getElementById("status");
+  var stage = document.getElementById("stage");
+  var exSel = document.getElementById("ex");
+  var EXAMPLES = {}; // id -> text, lazily fetched
+
+  function setStatus(kind, msg) {
+    status.className = "status " + kind;
+    status.textContent = msg;
+  }
+
+  var current = null;
+  function render() {
+    var text = src.value;
+    var play;
+    try {
+      play = DodgeballNotation.parsePlay(text);
+    } catch (e) {
+      setStatus("err", "✗ " + (e.message || e));
+      return;
+    }
+    try {
+      stage.innerHTML = "";
+      var host = document.createElement("div");
+      stage.appendChild(host);
+      current = DodgeballPlay.mount(host, play, { autoplay: false });
+      var steps = play.steps.length;
+      setStatus("ok", "✓ " + (play.name || "play") + " — " + steps + " step" + (steps === 1 ? "" : "s") + " parsed.");
+    } catch (e) {
+      setStatus("err", "✗ render error: " + (e.message || e));
+    }
+  }
+
+  // debounce live parse-as-you-type
+  var t;
+  src.addEventListener("input", function () { clearTimeout(t); t = setTimeout(render, 250); });
+  document.getElementById("render").addEventListener("click", render);
+  src.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); render(); }
+  });
+
+  exSel.addEventListener("change", function () {
+    var id = exSel.value;
+    if (!id) return;
+    if (EXAMPLES[id]) { src.value = EXAMPLES[id]; render(); return; }
+    fetch("../examples/" + id + ".play")
+      .then(function (r) { return r.text(); })
+      .then(function (txt) { EXAMPLES[id] = txt; src.value = txt; render(); })
+      .catch(function () { setStatus("err", "could not load example (serve over http, not file://)"); });
+  });
+
+  // start with Kill Left if reachable, else leave placeholder
+  exSel.value = "kill-left";
+  exSel.dispatchEvent(new Event("change"));
+})();
+</script>
+</body>
+</html>
