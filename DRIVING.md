@@ -73,6 +73,28 @@ Both produce the identical rendered play.
 | `getPlay()` | play object or `null` | last successfully parsed play |
 | `getText()` | string | current notation in the editor |
 | `isReady()` | boolean | API booted |
+| `player()` | mount instance or `null` | playback control: `{ play, pause, seek(t), step(±1), replay, el }` |
+
+### Driving playback (step-through)
+
+`window.DBNEditor.player()` returns the live mount. Step beat-to-beat — it snaps
+to and holds at each beat boundary:
+
+```js
+const p = window.DBNEditor.player();
+p.replay();    // restart from the top, playing
+p.pause();
+p.step(1);     // advance to the next beat boundary and hold
+p.step(-1);    // back one beat
+p.seek(0);     // jump to a raw time (play-units)
+```
+
+### Keyboard (when the player is focused)
+
+Click the preview (or Tab to it) to focus it, then: **space** play/pause,
+**←/→** previous/next beat, **R** (or **Home**) replay. Keys are scoped to the
+focused player and ignored while any input/textarea is focused, so they never
+interfere with typing notation. The scrubber shows a **beat marker** per step.
 
 Errors surface the canonical parser message (e.g. `DBN parse error: DBF
 missing T: group`) plus a best-effort `beat` number — we do not invent a new

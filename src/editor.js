@@ -90,6 +90,9 @@
 
   function getErrors() { return state.errors.slice(); }
   function getPlay() { return state.play; }
+  // the live mount instance: { play, pause, seek, step, replay, el } — lets an
+  // agent drive playback (step beat-to-beat, replay) programmatically.
+  function player() { return state.mount; }
   function getText() { return els.input ? els.input.value : ""; }
   function isReady() { return state.ready; }
 
@@ -141,6 +144,7 @@
     window.DBNEditor = {
       load: load, render: render, exportSVG: exportSVG, exportJSON: exportJSON,
       getErrors: getErrors, getPlay: getPlay, getText: getText, isReady: isReady,
+      player: player,
     };
     state.ready = true;
 

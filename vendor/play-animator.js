@@ -60,8 +60,14 @@
 .dbp__btn{appearance:none;border:1px solid #2a2f3a;background:#171b22;color:#e6e8ec;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;flex:none}
 .dbp__btn:hover{background:#1f242d}
 .dbp__btn svg{width:15px;height:15px;fill:currentColor}
-.dbp__scrub{flex:1;accent-color:${COL.us};cursor:pointer;height:4px}
+.dbp__scrubwrap{position:relative;flex:1;display:flex;align-items:center}
+.dbp__scrub{flex:1;accent-color:${COL.us};cursor:pointer;height:4px;position:relative;z-index:1}
+.dbp__ticks{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:13px;pointer-events:none;z-index:0}
+.dbp__tick{position:absolute;top:0;width:2px;height:13px;margin-left:-1px;background:${COL.centerline};opacity:.75;border-radius:1px}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.dbp:focus{outline:none}
+.dbp:focus-visible{outline:2px solid ${COL.us};outline-offset:2px}
+.dbp__hint{padding:0 13px 9px;font-size:.68rem;color:#6b7484}
 .dbp__loopwrap{display:flex;align-items:center;gap:4px;font-size:.72rem;color:#7d8593;cursor:pointer;user-select:none;flex:none}
 @media(prefers-color-scheme:light){
 .dbp{background:#fff;color:#16181d;border-color:#e6e8ec}
@@ -244,17 +250,39 @@
 
     const ctrls = document.createElement("div");
     ctrls.className = "dbp__ctrls";
+    const ICON_PREV = '<svg viewBox="0 0 24 24"><path d="M6 6h2.2v12H6zm12 0v12l-8.4-6z"/></svg>';
+    const ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
     ctrls.innerHTML =
+      '<button class="dbp__btn dbp__prev" aria-label="Previous step (left arrow)">' + ICON_PREV + '</button>' +
       '<button class="dbp__btn dbp__play" aria-label="Play"></button>' +
-      '<input class="dbp__scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub play">' +
+      '<button class="dbp__btn dbp__next" aria-label="Next step (right arrow)">' + ICON_NEXT + '</button>' +
+      '<span class="dbp__scrubwrap"><span class="dbp__ticks"></span>' +
+      '<input class="dbp__scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub play"></span>' +
       '<label class="dbp__loopwrap"><input type="checkbox" class="dbp__loop">loop</label>';
     root.appendChild(ctrls);
 
+    const hint = document.createElement("div");
+    hint.className = "dbp__hint";
+    hint.textContent = "Keys: space play/pause · ← → step · R replay";
+    root.appendChild(hint);
+
     const playBtn = ctrls.querySelector(".dbp__play");
+    const prevBtn = ctrls.querySelector(".dbp__prev");
+    const nextBtn = ctrls.querySelector(".dbp__next");
     const scrub = ctrls.querySelector(".dbp__scrub");
+    const ticksEl = ctrls.querySelector(".dbp__ticks");
     const stepEl = stepLine.querySelector(".dbp__step");
     const loopEl = ctrls.querySelector(".dbp__loop");
     loopEl.checked = !!opts.loop;
+
+    // beat boundaries (a compound timeline): [0, end-of-beat-1, …, totalDur]
+    const bounds = [0].concat(c.labels.map((l) => l.t1));
+    bounds.forEach((b) => {
+      const tick = document.createElement("span");
+      tick.className = "dbp__tick";
+      tick.style.left = (b / c.totalDur) * 100 + "%";
+      ticksEl.appendChild(tick);
+    });
 
     const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
     const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
@@ -346,14 +374,52 @@
     }
     function pause() { playing = false; cancelAnimationFrame(raf); updateBtn(); }
 
+    // step to the next/prev beat boundary and HOLD there (pause)
+    function stepTo(dir) {
+      pause();
+      const eps = 1e-4;
+      if (dir > 0) {
+        let nxt = null;
+        for (const b of bounds) { if (b > t + eps) { nxt = b; break; } }
+        setT(nxt == null ? c.totalDur : nxt);
+      } else {
+        let prev = 0;
+        for (const b of bounds) { if (b < t - eps) prev = b; else break; }
+        setT(prev);
+      }
+      updateBtn();
+    }
+    function replay() { setT(0); play_(); }
+
     playBtn.addEventListener("click", () => (playing ? pause() : play_()));
+    prevBtn.addEventListener("click", () => stepTo(-1));
+    nextBtn.addEventListener("click", () => stepTo(1));
     scrub.addEventListener("input", () => { pause(); setT((scrub.value / 1000) * c.totalDur); updateBtn(); });
+
+    // keyboard controls — scoped to THIS player (the listener is on root), so
+    // typing in any input/textarea elsewhere on the page is never hijacked.
+    // Click anywhere on the player to focus it; Tab also reaches it.
+    root.tabIndex = 0;
+    root.setAttribute("aria-label",
+      "Dodgeball play animation. Keys: space play/pause, left and right arrows step beat, R replay.");
+    root.addEventListener("mousedown", () => {
+      if (!root.contains(document.activeElement)) root.focus({ preventScroll: true });
+    });
+    root.addEventListener("keydown", (e) => {
+      const ae = document.activeElement;
+      // let native control keys work when a form control inside the player is focused
+      if (ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA" || ae.tagName === "SELECT" || ae.isContentEditable)) return;
+      if (e.key === " " || e.key === "Spacebar") { e.preventDefault(); playing ? pause() : play_(); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); stepTo(1); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); stepTo(-1); }
+      else if (e.key === "r" || e.key === "R" || e.key === "Home") { e.preventDefault(); replay(); }
+    });
 
     container.appendChild(root);
     setT(0); updateBtn();
     if (opts.autoplay) play_();
 
-    return { play: play_, pause, seek: setT, el: root };
+    return { play: play_, pause, seek: setT, step: stepTo, replay, el: root };
   }
 
   function autoInit() {

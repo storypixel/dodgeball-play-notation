@@ -47,6 +47,11 @@ automation: `dbn-input`, `render-button`, `example-select`, `speed-select`,
 Plays animate at **2× by default** (realistic pace). Change it with the speed
 control (1× / 2× / 3×) or `?speed=<n>`.
 
+**Step-through**: the scrubber shows a marker per beat; the ◀ ▶ buttons step
+beat-to-beat and hold. **Keyboard** (focus the preview): space play/pause, ←/→
+step beats, R replay. Agents can also drive playback via
+`window.DBNEditor.player()` (`play`/`pause`/`seek`/`step`/`replay`).
+
 ## Try it locally
 
 ```bash
