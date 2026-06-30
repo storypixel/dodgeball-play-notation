@@ -7,6 +7,7 @@
  * Upstream: https://github.com/storypixel/dodgeball-play-animator
  * ========================================================================== */
 /* DBN - Dodgeball Notation parser + auto-mount.
+/* DBN - Dodgeball Notation parser + auto-mount.
  *
  * Produces the same plain play objects consumed by play-animator.js.
  */
@@ -15,6 +16,12 @@
 
   const FILES = "abcdefghij";
   const TEAM = { U: "us", T: "them" };
+
+  // The grid is PARAMETRIC to team size: N columns where N = players per side
+  // (default 8). Files a..(a+N-1) divide the 0..100 width evenly, so a file's
+  // x = (fileIndex + 0.5) * (100 / N). Set once per parse() from the DBF. For a
+  // 10-a-side play N=10, which reproduces the original fixed 10-wide mapping.
+  let GRID_N = 10;
 
   function fail(msg) {
     throw new Error("DBN parse error: " + msg);
@@ -96,7 +103,8 @@
 
     const fileIdx = FILES.indexOf(m[1].toLowerCase());
     const rank = parseInt(m[2], 10);
-    return [(fileIdx + 0.5) * 10, (10 - rank + 0.5) * 10];
+    // parametric column width: evenly divide 0..100 into GRID_N columns
+    return [(fileIdx + 0.5) * (100 / GRID_N), (10 - rank + 0.5) * 10];
   }
 
   function sideForBallTag(tag) {
@@ -182,9 +190,13 @@
     if (!groups.U) fail("DBF missing U: group");
     if (!groups.T) fail("DBF missing T: group");
 
+    const uList = splitList(groups.U, ",");
+    const tList = splitList(groups.T, ",");
+    // grid columns = team size (the larger side); drives the file -> x mapping
+    GRID_N = Math.max(uList.length, tList.length) || 10;
     const setup = {
-      us: splitList(groups.U, ",").map(function (e) { return parseSetupPlayer(e, "U"); }),
-      them: splitList(groups.T, ",").map(function (e) { return parseSetupPlayer(e, "T"); }),
+      us: uList.map(function (e) { return parseSetupPlayer(e, "U"); }),
+      them: tList.map(function (e) { return parseSetupPlayer(e, "T"); }),
       balls: [],
     };
     const makeId = ballIdFactory();

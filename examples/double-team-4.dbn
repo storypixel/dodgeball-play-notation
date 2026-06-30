@@ -3,7 +3,6 @@
 [Badge "from Daniel's diagram"]
 [Call "two corners → 4"]
 [Desc "Straight from the whiteboard: both corner throwers commit to the same interior target — the 4th player — from opposite angles, so there's no single block that covers both balls."]
-DBF "U:1(14,90)*,2(24,90),3(35,90),4(45,90)*,5(55,90)*,6(65,90),7(76,90),8(86,90)* / T:1(14,10),2(24,10),3(35,10)*,4(45,10),5(55,10),6(65,10),7(76,10)*,8(86,10)"
-
+DBF "U:1a1*,2b1,3c1,4d1*,5e1*,6f1,7g1,8h1* / T:1a10,2b10,3c10*,4d10,5e10,6f10,7g10*,8h10"
 1. {Set — insides fake} :0.8  U4? U5?
 2. {Converge on 4} :1.1  U1@T4!~-20 U8@T4!~-30

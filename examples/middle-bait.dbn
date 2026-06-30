@@ -3,7 +3,6 @@
 [Badge "1-ball defense"]
 [Call "\"Middle\""]
 [Desc "Down to one ball: pass it to the middle, who takes an offensive position and baits the other team into throwing so we can win the ball back."]
-DBF "U:1(14,90)*,2(24,90),3(35,90),4(45,90),5(55,90),6(65,90),7(76,90),8(86,90) / T:1(14,10),2(24,10)*,3(35,10)*,4(45,10),5(55,10),6(65,10)*,7(76,10)*,8(86,10)*"
-
+DBF "U:1a1*,2b1,3c1,4d1,5e1,6f1,7g1,8h1 / T:1a10,2b10*,3c10*,4d10,5e10,6f10*,7g10*,8h10*"
 1. {Pass to the middle} :0.9  U1>U4 U4-(45,72)
 2. {Bait — they bite, he dodges} :1.1  T6@U4%~-16
