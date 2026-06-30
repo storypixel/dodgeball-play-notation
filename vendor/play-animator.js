@@ -60,10 +60,16 @@
 .dbp__btn{appearance:none;border:1px solid #2a2f3a;background:#171b22;color:#e6e8ec;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;flex:none}
 .dbp__btn:hover{background:#1f242d}
 .dbp__btn svg{width:15px;height:15px;fill:currentColor}
+.dbp__play{width:44px;height:44px;border-color:${COL.us}}
+.dbp__play svg{width:19px;height:19px}
+.dbp__prev,.dbp__next{transition:width .15s,height .15s,box-shadow .15s}
+.dbp--paused .dbp__prev,.dbp--paused .dbp__next{width:48px;height:48px;border-color:${COL.us};box-shadow:0 0 0 3px ${COL.us}22}
+.dbp--paused .dbp__prev svg,.dbp--paused .dbp__next svg{width:22px;height:22px}
 .dbp__scrubwrap{position:relative;flex:1;display:flex;align-items:center}
 .dbp__scrub{flex:1;accent-color:${COL.us};cursor:pointer;height:4px;position:relative;z-index:1}
 .dbp__ticks{position:absolute;left:7px;right:7px;top:50%;transform:translateY(-50%);height:14px;pointer-events:none;z-index:2}
-.dbp__tick{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border:2px solid #e6e8ec;border-radius:50%;background:transparent;box-shadow:0 0 0 1.5px rgba(0,0,0,.5)}
+.dbp__tick{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;padding:0;appearance:none;border:2px solid #e6e8ec;border-radius:50%;background:transparent;box-shadow:0 0 0 1.5px rgba(0,0,0,.5);pointer-events:auto;cursor:pointer}
+.dbp__tick:hover{border-color:${COL.us};transform:translate(-50%,-50%) scale(1.35)}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dbp:focus{outline:none}
 .dbp:focus-visible{outline:2px solid ${COL.us};outline-offset:2px}
@@ -123,6 +129,7 @@
     const totalDur = steps.reduce((s, st) => s + (st.dur || 1), 0) || 1;
     const states = [snapshot()];
     const throws = [];
+    const grabEvents = [];
     const labels = [];
     let t0 = 0;
 
@@ -139,11 +146,20 @@
         const a = actors.get(keyOf(mv.team, mv.n));
         if (a && mv.to) { a.x = mv.to[0]; a.y = mv.to[1]; }
       });
-      // grabs: a rusher collects one or more loose balls from the floor
+      // grabs: a rusher collects one or more loose balls. The ball leaves the
+      // floor at the START of the grab (gone = t0) and eases into the grabber's
+      // hand over the step (a grab tween), so across loose -> in-grab -> held it
+      // is drawn exactly once, never on the floor and in-hand at the same frame.
       (st.grabs || []).forEach((gr) => {
         const a = actors.get(keyOf(gr.team, gr.n));
         const ids = gr.balls || (gr.ball != null ? [gr.ball] : []);
-        ids.forEach((id) => { if (freeById[id]) freeById[id].gone = t0 + dur; });
+        ids.forEach((id) => {
+          const fb = freeById[id];
+          if (fb) {
+            fb.gone = t0;
+            grabEvents.push({ to: keyOf(gr.team, gr.n), t0: t0, t1: t0 + dur, fromX: fb.x, fromY: fb.y });
+          }
+        });
         if (a) a.balls += ids.length;
       });
       // throws fire across the step; thrower drops a ball, target goes out at end
@@ -186,7 +202,7 @@
       t0 += dur;
     });
 
-    return { keys: [...actors.keys()], states, throws, labels, totalDur, freeBalls };
+    return { keys: [...actors.keys()], states, throws, grabs: grabEvents, labels, totalDur, freeBalls };
   }
 
   // interpolate an actor's pos/flags at absolute time t
@@ -203,8 +219,11 @@
     return {
       x: lerp(a.x, b.x, e),
       y: lerp(a.y, b.y, e),
-      // ball count / out flip at the boundary they were set (end of step)
-      balls: e >= 0.999 ? b.balls : a.balls,
+      // ball count holds the entering-step value; it advances to the next step's
+      // value exactly at the boundary (t >= seg.t1 rolls i forward above), which
+      // keeps held-dot rendering aligned with the half-open moving-ball intervals
+      // so a ball is never both a held dot and a moving ball in the same frame.
+      balls: a.balls,
       out: t >= seg.t1 - 1e-6 ? b.out : a.out,
       fake: a.fake,
       team: key.split("-")[0],
@@ -285,10 +304,13 @@
 
     // beat boundaries (a compound timeline): [0, end-of-beat-1, …, totalDur]
     const bounds = [0].concat(c.labels.map((l) => l.t1));
-    bounds.forEach((b) => {
-      const tick = document.createElement("span");
+    bounds.forEach((b, i) => {
+      const tick = document.createElement("button");
       tick.className = "dbp__tick";
+      tick.type = "button";
       tick.style.left = (b / c.totalDur) * 100 + "%";
+      tick.setAttribute("aria-label", i === 0 ? "Jump to start" : "Jump to beat " + i);
+      tick.addEventListener("click", function () { pause(); setT(b); updateBtn(); });
       ticksEl.appendChild(tick);
     });
 
@@ -303,23 +325,33 @@
       // clear dynamic layer
       while (layer.firstChild) layer.removeChild(layer.firstChild);
 
-      // loose balls on the floor (drawn under the players)
-      c.freeBalls.forEach((b) => {
-        if (t >= b.gone) return;
-        layer.appendChild(svg("circle", { cx: px(b.x), cy: py(b.y), r: 10, fill: COL.ball, stroke: "#7a5c00", "stroke-width": 1.5 }));
+      // ── balls: a single per-frame handoff so each ball draws exactly once ──
+      // loose -> in-grab -> held (dots, with the actors) -> in-flight -> resolved.
+      // Every moving interval is half-open [t0, t1) so no two passes (or a pass
+      // and a held dot) ever cover the same frame — no ball is drawn twice.
+      const drawBall = (cx, cy, r) =>
+        layer.appendChild(svg("circle", { cx: cx, cy: cy, r: r || 10, fill: COL.ball, stroke: "#7a5c00", "stroke-width": 1.5 }));
+      const HX = 22, HY = -16; // hand slot — matches the first held-dot slot below
+
+      // 1) loose balls still on the floor (a grabbed ball leaves at its grab start)
+      c.freeBalls.forEach((b) => { if (t < b.gone) drawBall(px(b.x), py(b.y), 10); });
+
+      // 2) grab tweens: the ball eases from the floor into the grabber's hand
+      c.grabs.forEach((g) => {
+        if (t < g.t0 || t >= g.t1) return;
+        const e = easeInOut((t - g.t0) / Math.max(1e-6, g.t1 - g.t0));
+        const ga = actorAt(c, g.to, t);
+        drawBall(lerp(px(g.fromX), px(ga.x) + HX, e), lerp(py(g.fromY), py(ga.y) + HY, e), 10);
       });
 
-      // active throws as travelling balls
+      // 3) in-flight throws / passes: eased arc from the thrower's hand to target
       c.throws.forEach((th) => {
-        if (t < th.t0 || t > th.t1) return;
-        const local = (t - th.t0) / Math.max(1e-6, th.t1 - th.t0);
+        if (t < th.t0 || t >= th.t1) return;
+        const e = easeInOut((t - th.t0) / Math.max(1e-6, th.t1 - th.t0));
         const fa = actorAt(c, th.from, th.t0);
         const ta = actorAt(c, th.to, th.t1);
-        const x = lerp(px(fa.x), px(ta.x), local);
-        const baseY = lerp(py(fa.y), py(ta.y), local);
-        const arc = Math.sin(local * Math.PI) * th.curve; // visual arc
-        const ball = svg("circle", { cx: x, cy: baseY + arc, r: 11, fill: COL.ball, stroke: "#7a5c00", "stroke-width": 1.5 });
-        layer.appendChild(ball);
+        const arc = Math.sin(e * Math.PI) * th.curve;
+        drawBall(lerp(px(fa.x), px(ta.x), e), lerp(py(fa.y), py(ta.y), e) + arc, 11);
       });
 
       // actors
@@ -375,6 +407,9 @@
     function updateBtn() {
       playBtn.innerHTML = playing ? ICON_PAUSE : (t >= c.totalDur ? ICON_REPLAY : ICON_PLAY);
       playBtn.setAttribute("aria-label", playing ? "Pause" : (t >= c.totalDur ? "Replay" : "Play"));
+      // when paused, the prev/next-beat buttons grow into prominent slideshow
+      // controls (CSS .dbp--paused); during playback they stay compact.
+      root.classList.toggle("dbp--paused", !playing);
     }
     function play_() {
       if (t >= c.totalDur) t = 0;
