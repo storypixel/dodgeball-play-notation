@@ -1,8 +1,9 @@
 [Id "home"]
 [Play "Home"]
-[Badge "3-ball defense"]
+[Badge "defense"]
 [Call "\"Home\""]
-[Desc "Same trigger as Away, but instead of rushing we hold: the player opposite the thrower counters straight back from the back line while the rest pump-fake."]
-DBF "U:1a1,2b1*,3c1,4d1,5e1*,6f1,7g1*,8h1 / T:1a10,2b10*,3c10,4d10,5e10,6f10*,7g10,8h10*"
-1. {Read the throw — hold the line} :0.9  U2? U5? U7?
-2. {Home — counter from the back line} :1  U5@T4!~-12
+[Desc "Pre-counter: the designated player throws from their current position at a target of their choosing, releasing before or as the other team throws."]
+DBF "U:1(8,90),2(20,90),3(32,90)*,4(44,90),5(56,90)*,6(68,90),7(80,90)*,8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10),5(56,10)*,6(68,10),7(80,10),8(92,10)*"
+
+1. {Read the throw — hold your spot} :0.9  U3? U7? T5?
+2. {Home — pre-counter from your spot} :0.9  U5@T5!~-12

@@ -1,0 +1,9 @@
+[Id "middle"]
+[Play "Middle"]
+[Badge "1-ball defense"]
+[Call "\"Middle\""]
+[Desc "Down to one ball: it goes to a player in the middle, who takes an offensive position to bait throws and win the ball back. They almost never throw that last ball."]
+DBF "U:1(8,90)*,2(20,90),3(32,90),4(44,90),5(56,90),6(68,90),7(80,90),8(92,90) / T:1(8,10),2(20,10)*,3(32,10)*,4(44,10),5(56,10),6(68,10)*,7(80,10)*,8(92,10)*"
+
+1. {Pass to the middle} :0.9  U1>U4 U4-(44,72)
+2. {Bait — they bite, he dodges} :1.1  T6@U4%~-16

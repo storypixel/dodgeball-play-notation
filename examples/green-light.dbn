@@ -1,8 +1,0 @@
-[Id "green-light"]
-[Play "Green Light"]
-[Badge "3-ball defense"]
-[Call "\"Green light\""]
-[Desc "Red light means hold and push them back with fakes; one corner is given green light to counter the opposing attack when the look is there."]
-DBF "U:1a1*,2b1,3c1,4d1,5e1*,6f1,7g1,8h1* / T:1a10,2b10*,3c10,4d10*,5e10,6f10*,7g10,8h10"
-1. {Red light — hold and push} :0.9  U1? U5? U8?
-2. {Green light — right corner counters} :1  U8@T7!~-14

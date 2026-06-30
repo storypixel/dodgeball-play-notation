@@ -7,7 +7,6 @@
  * Upstream: https://github.com/storypixel/dodgeball-play-animator
  * ========================================================================== */
 /* Dodgeball Play Animator — self-contained, no dependencies.
-/* Dodgeball Play Animator — self-contained, no dependencies.
  *
  * One engine, mounted as many times as you like. Each mount renders an
  * overhead court "inset" that animates a single play.
@@ -27,20 +26,25 @@
   // ── court geometry (normalized play coords are 0..100 in both axes) ──
   // x = court width  (players spread 1..N left→right)
   // y = court depth  (0 = THEIR back line, 50 = center line, 100 = OUR back line)
-  const VB_W = 1000, VB_H = 660, PAD = 64;
-  const CW = VB_W - PAD * 2, CH = VB_H - PAD * 2;
-  const px = (nx) => PAD + (nx / 100) * CW;
-  const py = (ny) => PAD + (ny / 100) * CH;
+  const VB_W = 1000, VB_H = 660;
+  // The court fills the whole frame. Players are inset by PR so an end-line
+  // player (and a ball held at their side) never clips the edge — that inset is
+  // the only "margin", and it's exactly the player radius, nothing wasted.
+  const PR = 32;
+  const px = (nx) => PR + (nx / 100) * (VB_W - 2 * PR);
+  const py = (ny) => PR + (ny / 100) * (VB_H - 2 * PR);
 
   const COL = {
-    us: "#1f6feb",
-    them: "#e5484d",
-    ball: "#f2b705",
-    court: "#0e1014",
-    line: "#3a4150",
-    centerline: "#6b7484",
-    text: "#e6e8ec",
-    out: "#444b57",
+    us: "#111111",         // our team — solid black piece
+    them: "#ffffff",       // their team — white piece, told apart by the dark outline
+    ball: "#e23150",       // ball — red dot
+    court: "#e9edef",      // board light square
+    square: "#7e9aa7",     // board dark square — steel blue-grey (chess-diagram style)
+    frame: "#34424b",      // board frame — dark slate
+    line: "#34424b",       // court boundary / center line
+    centerline: "#34424b", // halfway line, dashed
+    text: "#111111",       // ink
+    out: "#c4ccd2",        // eliminated player — grey ghost
   };
 
   let stylesInjected = false;
@@ -48,40 +52,33 @@
     if (stylesInjected) return;
     stylesInjected = true;
     const css = `
-.dbp{font:400 14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;border:1px solid #2a2f3a;border-radius:12px;overflow:hidden;background:#0e1014;color:#e6e8ec;max-width:560px}
+.dbp{font:400 14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;border:1px solid #d4d4d4;overflow:hidden;background:#fff;color:#111;max-width:560px}
 .dbp__head{display:flex;align-items:baseline;gap:8px;padding:11px 13px 6px;flex-wrap:wrap}
 .dbp__name{font-weight:700;font-size:1rem;letter-spacing:-.01em}
-.dbp__badge{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#aab2c0;border:1px solid #2a2f3a;border-radius:999px;padding:2px 7px}
-.dbp__call{color:#7aa2ff;font-size:.85rem}
-.dbp__desc{padding:0 13px 9px;color:#aab2c0;font-size:.85rem}
+.dbp__badge{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:#666;border:1px solid #d4d4d4;border-radius:999px;padding:2px 7px}
+.dbp__call{color:#555;font-size:.85rem}
+.dbp__desc{padding:0 13px 9px;color:#555;font-size:.85rem}
 .dbp__stage{display:block;width:100%;height:auto;background:${COL.court};touch-action:none}
-.dbp__stepline{padding:9px 13px 0;font-size:.8rem;color:#aab2c0;min-height:1.2em}
+.dbp__stepline{padding:9px 13px 0;font-size:.8rem;color:#555;min-height:1.2em}
 .dbp__ctrls{display:flex;align-items:center;gap:10px;padding:7px 13px 11px}
-.dbp__btn{appearance:none;border:1px solid #2a2f3a;background:#171b22;color:#e6e8ec;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;flex:none}
-.dbp__btn:hover{background:#1f242d}
+.dbp__btn{appearance:none;border:1px solid #d4d4d4;background:#fff;color:#111;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;flex:none}
+.dbp__btn:hover{background:#f2f2f2}
 .dbp__btn svg{width:15px;height:15px;fill:currentColor}
-.dbp__play{width:44px;height:44px;border-color:${COL.us}}
+.dbp__play{width:44px;height:44px}
 .dbp__play svg{width:19px;height:19px}
-.dbp__prev,.dbp__next{transition:width .15s,height .15s,box-shadow .15s}
-.dbp--paused .dbp__prev,.dbp--paused .dbp__next{width:48px;height:48px;border-color:${COL.us};box-shadow:0 0 0 3px ${COL.us}22}
-.dbp--paused .dbp__prev svg,.dbp--paused .dbp__next svg{width:22px;height:22px}
-.dbp__scrubwrap{position:relative;flex:1;display:flex;align-items:center}
-.dbp__scrub{flex:1;accent-color:${COL.us};cursor:pointer;height:4px;position:relative;z-index:1}
-.dbp__ticks{position:absolute;left:7px;right:7px;top:50%;transform:translateY(-50%);height:14px;pointer-events:none;z-index:2}
-.dbp__tick{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;padding:0;appearance:none;border:2px solid #e6e8ec;border-radius:50%;background:transparent;box-shadow:0 0 0 1.5px rgba(0,0,0,.5);pointer-events:auto;cursor:pointer}
-.dbp__tick:hover{border-color:${COL.us};transform:translate(-50%,-50%) scale(1.35)}
+/* step buttons stay a fixed size — no growing between play/pause */
+.dbp__scrubwrap{flex:1;display:flex;align-items:center}
+.dbp__scrub{flex:1;position:relative;height:22px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+.dbp__track{position:relative;width:100%;height:4px;border-radius:999px;background:#e0e0e0}
+.dbp__fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:#111}
+.dbp__node{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:11px;height:11px;padding:0;appearance:none;border:2px solid #111;border-radius:50%;background:#fff;cursor:pointer;z-index:2}
+.dbp__node:hover{transform:translate(-50%,-50%) scale(1.3)}
+.dbp__thumb{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#111;box-shadow:0 0 0 2px #fff,0 1px 3px rgba(0,0,0,.35);pointer-events:none;z-index:3}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dbp:focus{outline:none}
-.dbp:focus-visible{outline:2px solid ${COL.us};outline-offset:2px}
-.dbp__hint{padding:0 13px 9px;font-size:.68rem;color:#6b7484}
-.dbp__loopwrap{display:flex;align-items:center;gap:4px;font-size:.72rem;color:#7d8593;cursor:pointer;user-select:none;flex:none}
-@media(prefers-color-scheme:light){
-.dbp{background:#fff;color:#16181d;border-color:#e6e8ec}
-.dbp__badge{color:#5b626e;border-color:#e6e8ec}
-.dbp__desc,.dbp__step{color:#5b626e}
-.dbp__btn{background:#f6f7f9;border-color:#e6e8ec;color:#16181d}
-.dbp__btn:hover{background:#eef0f3}
-}`;
+.dbp:focus-visible{outline:2px solid #111;outline-offset:2px}
+.dbp__hint{padding:0 13px 9px;font-size:.68rem;color:#888}
+.dbp__loopwrap{display:flex;align-items:center;gap:4px;font-size:.72rem;color:#777;cursor:pointer;user-select:none;flex:none}`;
     const s = document.createElement("style");
     s.textContent = css;
     document.head.appendChild(s);
@@ -256,14 +253,28 @@
     });
     root.appendChild(stage);
 
-    // static court
+    // static court — a chess-diagram board: dark frame, a 10×10 checkerboard over
+    // the DBN grid (files a–j, ranks 1–10), coordinate labels, dashed center line.
     const court = svg("g", {});
-    court.appendChild(svg("rect", { x: PAD, y: PAD, width: CW, height: CH, rx: 10, fill: COL.court, stroke: COL.line, "stroke-width": 2 }));
-    court.appendChild(svg("line", { x1: PAD, y1: py(50), x2: PAD + CW, y2: py(50), stroke: COL.centerline, "stroke-width": 2.5, "stroke-dasharray": "10 9" }));
-    // side labels
-    const lblThem = svg("text", { x: PAD + 10, y: PAD + 24, fill: COL.them, "font-size": 22, "font-weight": 700, opacity: .8 }); lblThem.textContent = "THEM";
-    const lblUs = svg("text", { x: PAD + 10, y: PAD + CH - 12, fill: COL.us, "font-size": 22, "font-weight": 700, opacity: .85 }); lblUs.textContent = "US";
-    court.appendChild(lblThem); court.appendChild(lblUs);
+    court.appendChild(svg("rect", { x: 0, y: 0, width: VB_W, height: VB_H, fill: COL.frame }));
+    const bx0 = px(0), by0 = py(0), bw = px(100) - px(0), bh = py(100) - py(0);
+    const COLS = 10, ROWS = 10, cw = bw / COLS, chh = bh / ROWS;
+    const isDark = (r, cc) => ((r + cc) % 2) === 1;
+    for (let r = 0; r < ROWS; r++) {
+      for (let cc = 0; cc < COLS; cc++) {
+        court.appendChild(svg("rect", { x: bx0 + cc * cw, y: by0 + r * chh, width: cw + 0.6, height: chh + 0.6, fill: isDark(r, cc) ? COL.square : COL.court }));
+      }
+    }
+    // coordinate labels: files a–j across the bottom row, ranks 1–10 down the left
+    for (let cc = 0; cc < COLS; cc++) {
+      const lab = svg("text", { x: bx0 + (cc + 1) * cw - 6, y: by0 + ROWS * chh - 7, "font-size": 15, "font-weight": 700, "text-anchor": "end", fill: isDark(ROWS - 1, cc) ? COL.court : COL.square, opacity: .9 });
+      lab.textContent = String.fromCharCode(97 + cc); court.appendChild(lab);
+    }
+    for (let r = 0; r < ROWS; r++) {
+      const lab = svg("text", { x: bx0 + 6, y: by0 + r * chh + 17, "font-size": 15, "font-weight": 700, fill: isDark(r, 0) ? COL.court : COL.square, opacity: .9 });
+      lab.textContent = String(ROWS - r); court.appendChild(lab);
+    }
+    court.appendChild(svg("line", { x1: bx0, y1: py(50), x2: bx0 + bw, y2: py(50), stroke: COL.centerline, "stroke-width": 3, "stroke-dasharray": "11 9" }));
     stage.appendChild(court);
 
     const layer = svg("g", {});
@@ -283,8 +294,8 @@
       '<button class="dbp__btn dbp__prev" aria-label="Previous step (left arrow)">' + ICON_PREV + '</button>' +
       '<button class="dbp__btn dbp__play" aria-label="Play"></button>' +
       '<button class="dbp__btn dbp__next" aria-label="Next step (right arrow)">' + ICON_NEXT + '</button>' +
-      '<span class="dbp__scrubwrap"><span class="dbp__ticks"></span>' +
-      '<input class="dbp__scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub play"></span>' +
+      '<span class="dbp__scrubwrap"><span class="dbp__scrub" role="slider" tabindex="0" aria-label="Scrub play">' +
+      '<span class="dbp__track"><span class="dbp__fill"></span><span class="dbp__thumb"></span></span></span></span>' +
       '<label class="dbp__loopwrap"><input type="checkbox" class="dbp__loop">loop</label>';
     root.appendChild(ctrls);
 
@@ -297,28 +308,33 @@
     const prevBtn = ctrls.querySelector(".dbp__prev");
     const nextBtn = ctrls.querySelector(".dbp__next");
     const scrub = ctrls.querySelector(".dbp__scrub");
-    const ticksEl = ctrls.querySelector(".dbp__ticks");
+    const track = scrub.querySelector(".dbp__track");
+    const fill = scrub.querySelector(".dbp__fill");
+    const thumb = scrub.querySelector(".dbp__thumb");
     const stepEl = stepLine.querySelector(".dbp__step");
     const loopEl = ctrls.querySelector(".dbp__loop");
     loopEl.checked = !!opts.loop;
 
-    // beat boundaries (a compound timeline): [0, end-of-beat-1, …, totalDur]
+    // beat boundaries (a compound timeline): [0, end-of-beat-1, …, totalDur].
+    // Nodes live INSIDE the track, positioned by the same percent the thumb uses,
+    // so the stopping points always line up exactly with the handle.
     const bounds = [0].concat(c.labels.map((l) => l.t1));
     bounds.forEach((b, i) => {
-      const tick = document.createElement("button");
-      tick.className = "dbp__tick";
-      tick.type = "button";
-      tick.style.left = (b / c.totalDur) * 100 + "%";
-      tick.setAttribute("aria-label", i === 0 ? "Jump to start" : "Jump to beat " + i);
-      tick.addEventListener("click", function () { pause(); setT(b); updateBtn(); });
-      ticksEl.appendChild(tick);
+      const node = document.createElement("button");
+      node.className = "dbp__node";
+      node.type = "button";
+      node.style.left = (b / c.totalDur) * 100 + "%";
+      node.setAttribute("aria-label", i === 0 ? "Jump to start" : "Jump to beat " + i);
+      node.addEventListener("pointerdown", function (e) { e.stopPropagation(); pause(); setT(b); updateBtn(); });
+      track.appendChild(node);
     });
 
     const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
     const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
     const ICON_REPLAY = '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>';
 
-    let playing = false, t = 0, raf = 0, lastTs = 0;
+    let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0;
+    const DWELL_MS = 480; // hold this long at each beat node during playback
     const SPEED = (opts.speed || 2) * 1.0; // play-units per second; default 2x for realistic pace. Pass speed:1 for the old pace.
 
     function render() {
@@ -330,7 +346,7 @@
       // Every moving interval is half-open [t0, t1) so no two passes (or a pass
       // and a held dot) ever cover the same frame — no ball is drawn twice.
       const drawBall = (cx, cy, r) =>
-        layer.appendChild(svg("circle", { cx: cx, cy: cy, r: r || 10, fill: COL.ball, stroke: "#7a5c00", "stroke-width": 1.5 }));
+        layer.appendChild(svg("circle", { cx: cx, cy: cy, r: r || 10, fill: COL.ball, stroke: "#8c1024", "stroke-width": 1.5 }));
       const HX = 22, HY = -16; // hand slot — matches the first held-dot slot below
 
       // 1) loose balls still on the floor (a grabbed ball leaves at its grab start)
@@ -344,11 +360,17 @@
         drawBall(lerp(px(g.fromX), px(ga.x) + HX, e), lerp(py(g.fromY), py(ga.y) + HY, e), 10);
       });
 
-      // 3) in-flight throws / passes: eased arc from the thrower's hand to target
+      // 3) in-flight throws / passes: a fast snap over a short window at the END
+      // of the beat. The ball is quick (a throw is a snap); the players keep their
+      // own, slower pace over the full beat. FLIGHT is in play-seconds, so it stays
+      // fast regardless of how long the beat is.
+      const FLIGHT = 0.26;
       c.throws.forEach((th) => {
-        if (t < th.t0 || t >= th.t1) return;
-        const e = easeInOut((t - th.t0) / Math.max(1e-6, th.t1 - th.t0));
-        const fa = actorAt(c, th.from, th.t0);
+        const flight = Math.min(FLIGHT, th.t1 - th.t0);
+        const rel = th.t1 - flight; // release moment — ball leaves the hand here
+        if (t < rel || t >= th.t1) return;
+        const e = (t - rel) / flight; // linear & fast
+        const fa = actorAt(c, th.from, rel);
         const ta = actorAt(c, th.to, th.t1);
         const arc = Math.sin(e * Math.PI) * th.curve;
         drawBall(lerp(px(fa.x), px(ta.x), e), lerp(py(fa.y), py(ta.y), e) + arc, 11);
@@ -358,26 +380,29 @@
       c.keys.forEach((key) => {
         const a = actorAt(c, key, t);
         const X = px(a.x), Y = py(a.y);
-        const g = svg("g", { opacity: a.out ? 0.32 : 1 });
+        // out players fade to a grey ghost, but the red X stays full-strength on top
+        const g = svg("g", {});
         const fill = a.out ? COL.out : COL[a.team];
+        const ghost = a.out ? 0.4 : 1;
         // pump-fake wiggle
         const wob = a.fake && playing ? Math.sin(t * 40) * 3 : 0;
-        const c1 = svg("circle", { cx: X + wob, cy: Y, r: 19, fill, stroke: "#0e1014", "stroke-width": 2 });
+        const c1 = svg("circle", { cx: X + wob, cy: Y, r: 19, fill, stroke: "#111111", "stroke-width": 2, opacity: ghost });
         g.appendChild(c1);
-        const num = svg("text", { x: X + wob, y: Y + 6, fill: "#fff", "font-size": 18, "font-weight": 700, "text-anchor": "middle" });
+        const numFill = (a.team === "us" && !a.out) ? "#fff" : "#111";
+        const num = svg("text", { x: X + wob, y: Y + 6, fill: numFill, "font-size": 18, "font-weight": 700, "text-anchor": "middle", opacity: ghost });
         num.textContent = a.n;
         g.appendChild(num);
         if (a.out) {
-          g.appendChild(svg("line", { x1: X - 13, y1: Y - 13, x2: X + 13, y2: Y + 13, stroke: "#cdd2db", "stroke-width": 3 }));
-          g.appendChild(svg("line", { x1: X + 13, y1: Y - 13, x2: X - 13, y2: Y + 13, stroke: "#cdd2db", "stroke-width": 3 }));
+          g.appendChild(svg("line", { class: "dbp__outx", x1: X - 15, y1: Y - 15, x2: X + 15, y2: Y + 15, stroke: "#111111", "stroke-width": 4.5, "stroke-linecap": "round" }));
+          g.appendChild(svg("line", { class: "dbp__outx", x1: X + 15, y1: Y - 15, x2: X - 15, y2: Y + 15, stroke: "#111111", "stroke-width": 4.5, "stroke-linecap": "round" }));
         }
         // held balls — one dot per ball; a ball mid-flight is already off the hand
-        const inFlight = c.throws.filter((th) => th.from === key && t >= th.t0 && t < th.t1).length;
+        const inFlight = c.throws.filter((th) => { const fl = Math.min(0.26, th.t1 - th.t0); return th.from === key && t >= th.t1 - fl && t < th.t1; }).length;
         const held = Math.max(0, a.balls - inFlight);
         if (!a.out && held > 0) {
           const slots = [[22, -16], [22, 6]];
           for (let h = 0; h < Math.min(held, slots.length); h++) {
-            g.appendChild(svg("circle", { cx: X + slots[h][0], cy: Y + slots[h][1], r: 9, fill: COL.ball, stroke: "#7a5c00", "stroke-width": 1.5 }));
+            g.appendChild(svg("circle", { cx: X + slots[h][0], cy: Y + slots[h][1], r: 9, fill: COL.ball, stroke: "#8c1024", "stroke-width": 1.5 }));
           }
         }
         layer.appendChild(g);
@@ -386,7 +411,10 @@
       // step label + scrub sync
       const seg = c.labels.find((l) => t < l.t1) || c.labels[c.labels.length - 1];
       stepEl.textContent = seg ? seg.text : "";
-      scrub.value = Math.round((t / c.totalDur) * 1000);
+      const pct = (t / c.totalDur) * 100;
+      fill.style.width = pct + "%";
+      thumb.style.left = pct + "%";
+      scrub.setAttribute("aria-valuenow", Math.round(pct));
     }
 
     function setT(nt) { t = Math.max(0, Math.min(c.totalDur, nt)); render(); }
@@ -394,11 +422,20 @@
     function frame(ts) {
       if (!playing) return;
       if (!lastTs) lastTs = ts;
+      // hold at a beat node (the animation pauses briefly at each stopping point)
+      if (dwellUntil) {
+        if (ts < dwellUntil) { lastTs = ts; raf = requestAnimationFrame(frame); return; }
+        dwellUntil = 0; lastTs = ts;
+      }
       const dt = (ts - lastTs) / 1000;
       lastTs = ts;
-      t += dt * SPEED;
+      let nt = t + dt * SPEED;
+      // if this frame crosses an intermediate beat node, snap to it and dwell
+      const node = bounds.find((b) => b > t + 1e-6 && b <= nt + 1e-6 && b < c.totalDur - 1e-6);
+      if (node != null) { nt = node; dwellUntil = ts + DWELL_MS; }
+      t = nt;
       if (t >= c.totalDur) {
-        if (loopEl.checked) { t = 0; }
+        if (loopEl.checked) { t = 0; dwellUntil = 0; }
         else { t = c.totalDur; pause(); render(); updateBtn(); return; }
       }
       render();
@@ -413,7 +450,7 @@
     }
     function play_() {
       if (t >= c.totalDur) t = 0;
-      playing = true; lastTs = 0; updateBtn(); raf = requestAnimationFrame(frame);
+      playing = true; lastTs = 0; dwellUntil = 0; updateBtn(); raf = requestAnimationFrame(frame);
     }
     function pause() { playing = false; cancelAnimationFrame(raf); updateBtn(); }
 
@@ -437,7 +474,13 @@
     playBtn.addEventListener("click", () => (playing ? pause() : play_()));
     prevBtn.addEventListener("click", () => stepTo(-1));
     nextBtn.addEventListener("click", () => stepTo(1));
-    scrub.addEventListener("input", () => { pause(); setT((scrub.value / 1000) * c.totalDur); updateBtn(); });
+    function seekToClientX(clientX) {
+      const r = track.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+      pause(); setT(pct * c.totalDur); updateBtn();
+    }
+    scrub.addEventListener("pointerdown", (e) => { e.preventDefault(); try { scrub.setPointerCapture(e.pointerId); } catch (x) {} seekToClientX(e.clientX); });
+    scrub.addEventListener("pointermove", (e) => { if (e.buttons) seekToClientX(e.clientX); });
 
     // keyboard controls — scoped to THIS player (the listener is on root), so
     // typing in any input/textarea elsewhere on the page is never hijacked.

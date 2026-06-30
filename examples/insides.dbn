@@ -2,7 +2,8 @@
 [Play "Insides"]
 [Badge "4-ball offense"]
 [Call "\"Insides on 5\""]
-[Desc "The two middle players pick one target — here the 5th from the left. Hits from the center are hard to read until the ball is already gone."]
-DBF "U:1a1*,2b1,3c1,4d1*,5e1*,6f1,7g1,8h1* / T:1a10,2b10,3c10*,4d10,5e10,6f10,7g10*,8h10"
-1. {Set — corners fake} :0.8  U1? U8?
+[Desc "Four-ball call. The two middle players throw at the same number — here the 5th from the left. The corners hold the other two balls."]
+DBF "U:1(8,90)*,2(20,90),3(32,90),4(44,90)*,5(56,90)*,6(68,90),7(80,90),8(92,90)* / T:1(8,10),2(20,10),3(32,10)*,4(44,10),5(56,10),6(68,10),7(80,10)*,8(92,10)"
+
+1. {Set — corners hold, fake} :0.8  U1? U8?
 2. {Insides on 5} :1.1  U4@T5!~-22 U5@T5!~-14

@@ -105,7 +105,12 @@
   function loadExample(id) {
     return fetch("examples/" + id + ".dbn")
       .then(function (r) { if (!r.ok) throw new Error("not found"); return r.text(); })
-      .then(function (txt) { load(txt); return txt; })
+      .then(function (txt) {
+        load(txt);
+        // reflect the loaded play in the URL so it's shareable / linkable
+        try { history.replaceState(null, "", "?play=" + encodeURIComponent(id)); } catch (e) {}
+        return txt;
+      })
       .catch(function () { setStatus("err", "could not load example '" + id + "' (serve over http)"); });
   }
 
@@ -157,8 +162,8 @@
       if (els.exampleSel) els.exampleSel.value = play;
       loadExample(play);
     } else {
-      if (els.exampleSel) els.exampleSel.value = "kill-left";
-      loadExample("kill-left");
+      if (els.exampleSel) els.exampleSel.value = "insides";
+      loadExample("insides");
     }
     document.documentElement.setAttribute("data-dbn-ready", "1");
   }

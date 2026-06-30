@@ -1,8 +1,0 @@
-[Id "crash"]
-[Play "Crash"]
-[Badge "2-ball defense"]
-[Call "\"Crash\""]
-[Desc "After they throw, both corners rush the line and gang up on whoever just threw — the counter you call when you're up players."]
-DBF "U:1a1*,2b1,3c1,4d1,5e1,6f1,7g1,8h1* / T:1a10,2b10*,3c10,4d10,5e10*,6f10*,7g10*,8h10"
-1. {They throw — corners crash} :1.1  U1-(38,54) U8-(54,54)
-2. {Both attack the thrower} :1  U1@T4!~-22 U8@T4!~-14

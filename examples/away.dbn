@@ -1,8 +1,9 @@
 [Id "away"]
 [Play "Away"]
-[Badge "3-ball defense"]
+[Badge "defense"]
 [Call "\"Away\""]
-[Desc "Triggered when they throw: all ball-holders rush the center line, and the player opposite the thrower counters from at or near the line while they're still recovering."]
-DBF "U:1a1,2b1*,3c1,4d1,5e1*,6f1,7g1*,8h1 / T:1a10,2b10*,3c10,4d10*,5e10,6f10,7g10,8h10*"
-1. {They throw — rush the line} :1  U2-(24,54) U5-(55,54) U7-(76,54)
-2. {Counter the thrower} :1  U5@T5!~-16
+[Desc "All ball-holders charge the center line and the designated player throws at a target — usually whoever just threw."]
+DBF "U:1(8,90),2(20,90)*,3(32,90),4(44,90),5(56,90)*,6(68,90),7(80,90)*,8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10)*,5(56,10),6(68,10),7(80,10),8(92,10)*"
+
+1. {They throw — charge the line} :1  U2-(20,54) U5-(56,54) U7-(80,54)
+2. {Designated throws the thrower} :1  U5@T5!~-16
