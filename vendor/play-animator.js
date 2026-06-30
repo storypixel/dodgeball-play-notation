@@ -66,19 +66,15 @@
 .dbp__btn svg{width:15px;height:15px;fill:currentColor}
 .dbp__play{width:44px;height:44px}
 .dbp__play svg{width:19px;height:19px}
-/* step buttons stay a fixed size — no growing between play/pause */
-.dbp__scrubwrap{flex:1;display:flex;align-items:center}
-.dbp__scrub{flex:1;position:relative;height:22px;display:flex;align-items:center;cursor:pointer;touch-action:none}
-.dbp__track{position:relative;width:100%;height:4px;border-radius:999px;background:#e0e0e0}
-.dbp__fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:999px;background:#111}
-.dbp__node{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:11px;height:11px;padding:0;appearance:none;border:2px solid #111;border-radius:50%;background:#fff;cursor:pointer;z-index:2}
-.dbp__node:hover{transform:translate(-50%,-50%) scale(1.3)}
-.dbp__thumb{position:absolute;top:50%;left:0;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#111;box-shadow:0 0 0 2px #fff,0 1px 3px rgba(0,0,0,.35);pointer-events:none;z-index:3}
+/* slideshow beat dots — one per beat, current one filled */
+.dbp__dots{flex:1;display:flex;align-items:center;gap:9px;padding-left:6px;flex-wrap:wrap}
+.dbp__dot{width:11px;height:11px;padding:0;appearance:none;border:2px solid #b9bec4;border-radius:50%;background:#fff;cursor:pointer;flex:none}
+.dbp__dot:hover{border-color:#111}
+.dbp__dot--on{background:#111;border-color:#111}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dbp:focus{outline:none}
 .dbp:focus-visible{outline:2px solid #111;outline-offset:2px}
-.dbp__hint{padding:0 13px 9px;font-size:.68rem;color:#888}
-.dbp__loopwrap{display:flex;align-items:center;gap:4px;font-size:.72rem;color:#777;cursor:pointer;user-select:none;flex:none}`;
+.dbp__hint{padding:0 13px 9px;font-size:.68rem;color:#888}`;
     const s = document.createElement("style");
     s.textContent = css;
     document.head.appendChild(s);
@@ -285,50 +281,43 @@
     ctrls.className = "dbp__ctrls";
     const ICON_PREV = '<svg viewBox="0 0 24 24"><path d="M6 6h2.2v12H6zm12 0v12l-8.4-6z"/></svg>';
     const ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
+    // a play is a SLIDESHOW of beats, not a video: prev / play-through / next,
+    // with one dot per beat. It advances and STOPS at the end (no loop, no scrub).
     ctrls.innerHTML =
-      '<button class="dbp__btn dbp__prev" aria-label="Previous step (left arrow)">' + ICON_PREV + '</button>' +
-      '<button class="dbp__btn dbp__play" aria-label="Play"></button>' +
-      '<button class="dbp__btn dbp__next" aria-label="Next step (right arrow)">' + ICON_NEXT + '</button>' +
-      '<span class="dbp__scrubwrap"><span class="dbp__scrub" role="slider" tabindex="0" aria-label="Scrub play">' +
-      '<span class="dbp__track"><span class="dbp__fill"></span><span class="dbp__thumb"></span></span></span></span>' +
-      '<label class="dbp__loopwrap"><input type="checkbox" class="dbp__loop">loop</label>';
+      '<button class="dbp__btn dbp__prev" aria-label="Previous beat">' + ICON_PREV + '</button>' +
+      '<button class="dbp__btn dbp__play" aria-label="Play through"></button>' +
+      '<button class="dbp__btn dbp__next" aria-label="Next beat">' + ICON_NEXT + '</button>' +
+      '<span class="dbp__dots" role="tablist"></span>';
     root.appendChild(ctrls);
 
     const hint = document.createElement("div");
     hint.className = "dbp__hint";
-    hint.textContent = "Keys: space play/pause · ← → step · R replay";
+    hint.textContent = "Keys: space play · ← → beat · R restart";
     root.appendChild(hint);
 
     const playBtn = ctrls.querySelector(".dbp__play");
     const prevBtn = ctrls.querySelector(".dbp__prev");
     const nextBtn = ctrls.querySelector(".dbp__next");
-    const scrub = ctrls.querySelector(".dbp__scrub");
-    const track = scrub.querySelector(".dbp__track");
-    const fill = scrub.querySelector(".dbp__fill");
-    const thumb = scrub.querySelector(".dbp__thumb");
+    const dotsEl = ctrls.querySelector(".dbp__dots");
     const stepEl = stepLine.querySelector(".dbp__step");
-    const loopEl = ctrls.querySelector(".dbp__loop");
-    loopEl.checked = !!opts.loop;
 
-    // beat boundaries (a compound timeline): [0, end-of-beat-1, …, totalDur].
-    // Nodes live INSIDE the track, positioned by the same percent the thumb uses,
-    // so the stopping points always line up exactly with the handle.
+    // beat boundaries: [0, end-of-beat-1, …, totalDur]. One dot per beat (slide).
     const bounds = [0].concat(c.labels.map((l) => l.t1));
-    bounds.forEach((b, i) => {
-      const node = document.createElement("button");
-      node.className = "dbp__node";
-      node.type = "button";
-      node.style.left = (b / c.totalDur) * 100 + "%";
-      node.setAttribute("aria-label", i === 0 ? "Jump to start" : "Jump to beat " + i);
-      node.addEventListener("pointerdown", function (e) { e.stopPropagation(); pause(); setT(b); updateBtn(); });
-      track.appendChild(node);
+    const beatDots = c.labels.map((l, i) => {
+      const dot = document.createElement("button");
+      dot.className = "dbp__dot";
+      dot.type = "button";
+      dot.setAttribute("aria-label", "Beat " + (i + 1) + (l.text ? ": " + l.text : ""));
+      dot.addEventListener("click", function () { stopAt = null; pause(); setT(l.t0); updateBtn(); });
+      dotsEl.appendChild(dot);
+      return dot;
     });
 
     const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
     const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
     const ICON_REPLAY = '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>';
 
-    let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0;
+    let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0, stopAt = null;
     const DWELL_MS = 750; // hold this long at each beat node during playback
     const SPEED = (opts.speed || 2) * 1.0; // play-units per second; default 2x for realistic pace. Pass speed:1 for the old pace.
 
@@ -379,12 +368,11 @@
         const g = svg("g", {});
         const fill = a.out ? COL.out : COL[a.team];
         const ghost = a.out ? 0.4 : 1;
-        // pump-fake wiggle
-        const wob = a.fake && playing ? Math.sin(t * 40) * 3 : 0;
-        const c1 = svg("circle", { cx: X + wob, cy: Y, r: 19, fill, stroke: "#111111", "stroke-width": 2, opacity: ghost });
+        // the player stands still — a pump-fake shakes the BALL, not the body (below)
+        const c1 = svg("circle", { cx: X, cy: Y, r: 19, fill, stroke: "#111111", "stroke-width": 2, opacity: ghost });
         g.appendChild(c1);
         const numFill = (a.team === "us" && !a.out) ? "#fff" : "#111";
-        const num = svg("text", { x: X + wob, y: Y + 6, fill: numFill, "font-size": 18, "font-weight": 700, "text-anchor": "middle", opacity: ghost });
+        const num = svg("text", { x: X, y: Y + 6, fill: numFill, "font-size": 18, "font-weight": 700, "text-anchor": "middle", opacity: ghost });
         num.textContent = a.n;
         g.appendChild(num);
         if (a.out) {
@@ -395,21 +383,24 @@
         const inFlight = c.throws.filter((th) => { const fl = Math.min(0.7, th.t1 - th.t0); return th.from === key && t >= th.t1 - fl && t < th.t1; }).length;
         const held = Math.max(0, a.balls - inFlight);
         if (!a.out && held > 0) {
+          // a pump-fake jitters the held ball (faking the throw), the player is still
+          const fx = a.fake && playing ? Math.sin(t * 48) * 4 : 0;
+          const fy = a.fake && playing ? Math.cos(t * 41) * 3 : 0;
           const slots = [[22, -16], [22, 6]];
           for (let h = 0; h < Math.min(held, slots.length); h++) {
-            g.appendChild(svg("circle", { cx: X + slots[h][0], cy: Y + slots[h][1], r: 9, fill: COL.ball, stroke: "#8c1024", "stroke-width": 1.5 }));
+            g.appendChild(svg("circle", { cx: X + slots[h][0] + fx, cy: Y + slots[h][1] + fy, r: 9, fill: COL.ball, stroke: "#8c1024", "stroke-width": 1.5 }));
           }
         }
         layer.appendChild(g);
       });
 
-      // step label + scrub sync
-      const seg = c.labels.find((l) => t < l.t1) || c.labels[c.labels.length - 1];
-      stepEl.textContent = seg ? seg.text : "";
-      const pct = (t / c.totalDur) * 100;
-      fill.style.width = pct + "%";
-      thumb.style.left = pct + "%";
-      scrub.setAttribute("aria-valuenow", Math.round(pct));
+      // step label + current-beat dot
+      let cur = c.labels.findIndex((l) => t < l.t1);
+      if (cur < 0) cur = c.labels.length - 1;
+      stepEl.textContent = c.labels[cur]
+        ? (cur + 1) + "/" + c.labels.length + (c.labels[cur].text ? " · " + c.labels[cur].text : "")
+        : "";
+      beatDots.forEach((d, i) => d.classList.toggle("dbp__dot--on", i === cur));
     }
 
     function setT(nt) { t = Math.max(0, Math.min(c.totalDur, nt)); render(); }
@@ -425,57 +416,51 @@
       const dt = (ts - lastTs) / 1000;
       lastTs = ts;
       let nt = t + dt * SPEED;
-      // if this frame crosses an intermediate beat node, snap to it and dwell
+      // single-beat advance: play to the target boundary and STOP there
+      if (stopAt != null && nt >= stopAt - 1e-6) {
+        t = stopAt; stopAt = null; render(); pause(); updateBtn(); return;
+      }
+      // playing through: snap to each beat node, dwell, then continue
       const node = bounds.find((b) => b > t + 1e-6 && b <= nt + 1e-6 && b < c.totalDur - 1e-6);
       if (node != null) { nt = node; dwellUntil = ts + DWELL_MS; }
       t = nt;
-      if (t >= c.totalDur) {
-        if (loopEl.checked) { t = 0; dwellUntil = 0; }
-        else { t = c.totalDur; pause(); render(); updateBtn(); return; }
-      }
+      // it is a slideshow, not a video: it stops at the end, it does not loop
+      if (t >= c.totalDur) { t = c.totalDur; render(); pause(); updateBtn(); return; }
       render();
       raf = requestAnimationFrame(frame);
     }
     function updateBtn() {
       playBtn.innerHTML = playing ? ICON_PAUSE : (t >= c.totalDur ? ICON_REPLAY : ICON_PLAY);
-      playBtn.setAttribute("aria-label", playing ? "Pause" : (t >= c.totalDur ? "Replay" : "Play"));
-      // when paused, the prev/next-beat buttons grow into prominent slideshow
-      // controls (CSS .dbp--paused); during playback they stay compact.
-      root.classList.toggle("dbp--paused", !playing);
+      playBtn.setAttribute("aria-label", playing ? "Pause" : (t >= c.totalDur ? "Restart" : "Play through"));
     }
     function play_() {
-      if (t >= c.totalDur) t = 0;
       playing = true; lastTs = 0; dwellUntil = 0; updateBtn(); raf = requestAnimationFrame(frame);
     }
     function pause() { playing = false; cancelAnimationFrame(raf); updateBtn(); }
 
-    // step to the next/prev beat boundary and HOLD there (pause)
-    function stepTo(dir) {
-      pause();
+    // play through all remaining beats, then stop at the end
+    function playAll() { stopAt = null; if (t >= c.totalDur) t = 0; play_(); }
+    // advance one slide: play the next beat's motion and stop at its end
+    function nextBeat() {
       const eps = 1e-4;
-      if (dir > 0) {
-        let nxt = null;
-        for (const b of bounds) { if (b > t + eps) { nxt = b; break; } }
-        setT(nxt == null ? c.totalDur : nxt);
-      } else {
-        let prev = 0;
-        for (const b of bounds) { if (b < t - eps) prev = b; else break; }
-        setT(prev);
-      }
-      updateBtn();
+      if (t >= c.totalDur - eps) return;
+      let nxt = c.totalDur;
+      for (const b of bounds) { if (b > t + eps) { nxt = b; break; } }
+      stopAt = nxt; play_();
     }
-    function replay() { setT(0); play_(); }
+    // go back one slide (instant)
+    function prevBeat() {
+      const eps = 1e-4;
+      stopAt = null; pause();
+      let prev = 0;
+      for (const b of bounds) { if (b < t - eps) prev = b; else break; }
+      setT(prev); updateBtn();
+    }
+    function replay() { stopAt = null; setT(0); playAll(); }
 
-    playBtn.addEventListener("click", () => (playing ? pause() : play_()));
-    prevBtn.addEventListener("click", () => stepTo(-1));
-    nextBtn.addEventListener("click", () => stepTo(1));
-    function seekToClientX(clientX) {
-      const r = track.getBoundingClientRect();
-      const pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
-      pause(); setT(pct * c.totalDur); updateBtn();
-    }
-    scrub.addEventListener("pointerdown", (e) => { e.preventDefault(); try { scrub.setPointerCapture(e.pointerId); } catch (x) {} seekToClientX(e.clientX); });
-    scrub.addEventListener("pointermove", (e) => { if (e.buttons) seekToClientX(e.clientX); });
+    playBtn.addEventListener("click", () => (playing ? pause() : playAll()));
+    prevBtn.addEventListener("click", prevBeat);
+    nextBtn.addEventListener("click", nextBeat);
 
     // keyboard controls — scoped to THIS player (the listener is on root), so
     // typing in any input/textarea elsewhere on the page is never hijacked.
@@ -490,17 +475,17 @@
       const ae = document.activeElement;
       // let native control keys work when a form control inside the player is focused
       if (ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA" || ae.tagName === "SELECT" || ae.isContentEditable)) return;
-      if (e.key === " " || e.key === "Spacebar") { e.preventDefault(); playing ? pause() : play_(); }
-      else if (e.key === "ArrowRight") { e.preventDefault(); stepTo(1); }
-      else if (e.key === "ArrowLeft") { e.preventDefault(); stepTo(-1); }
+      if (e.key === " " || e.key === "Spacebar") { e.preventDefault(); playing ? pause() : playAll(); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); nextBeat(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); prevBeat(); }
       else if (e.key === "r" || e.key === "R" || e.key === "Home") { e.preventDefault(); replay(); }
     });
 
     container.appendChild(root);
     setT(0); updateBtn();
-    if (opts.autoplay) play_();
+    if (opts.autoplay) playAll();
 
-    return { play: play_, pause, seek: setT, step: stepTo, replay, el: root };
+    return { play: playAll, pause, seek: setT, next: nextBeat, prev: prevBeat, replay, el: root };
   }
 
   function autoInit() {
