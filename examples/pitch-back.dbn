@@ -2,14 +2,9 @@
 [Play "Pitch Back"]
 [Badge "opening rush"]
 [Call "\"Pitch back\""]
-[Desc "Six balls sit on the center line — the right three are OURS, the left three are THEIRS. The two right-side players rush and grab our three (one grabs two, one grabs one). On the pitch back, a rusher tosses a ball straight back to an attacker, who steps up to mid-court and takes a free look — usually at one of the two opponents still backpedaling from their own rush."]
-DBF "U:1(14,90),2(22,90),3(30,90),4(38,90),5(46,90),6(54,90),7(62,90),8(70,90),9(78,90),10(86,90) / T:1(14,10),2(22,10),3(30,10),4(38,10),5(46,10),6(54,10),7(62,10),8(70,10),9(78,10),10(86,10) / B:bU(80,50),bU(88,50),bU(96,50),bT(4,50),bT(12,50),bT(20,50)"
+[Desc "Six balls on the line — the right three are OURS, the left three are THEIRS. The two right players rush and grab our three (one grabs two, one grabs one), then pitch one back to an attacker who steps up to mid-court and picks off a backpedaling rusher."]
+DBF "U:1(14,90),2(24,90),3(35,90),4(45,90),5(55,90),6(65,90),7(76,90),8(86,90) / T:1(14,10),2(24,10),3(35,10),4(45,10),5(55,10),6(65,10),7(76,10),8(86,10) / B:bU(80,50),bU(88,50),bU(96,50),bT(4,50),bT(12,50),bT(20,50)"
 
-1. {Rush — the two on the right grab our three (2 + 1)} :1.3
-   U10-(92,54) U9-(80,54) T1-(8,46) T2-(20,46)
-   U10*bU(88,50) U10*bU(96,50) U9*bU(80,50)
-   T1*bT(4,50) T1*bT(12,50) T2*bT(20,50)
-2. {Pitch back — attacker steps up} :0.9
-   U10>U6 U6-(54,68) T1-(10,30) T2-(22,30)
-3. {Free look — hit a regressing rusher} :1.0
-   T1-(12,20) T2-(24,20) U6@T2!~-20
+1. {Rush — the two on the right grab our three (2 + 1)} :1.3  U8-(92,54) U8*bU(88,50) U8*bU(96,50) U7-(80,54) U7*bU(80,50) T1-(8,46) T1*bT(4,50) T1*bT(12,50) T2-(20,46) T2*bT(20,50)
+2. {Pitch back — attacker steps up} :0.9  U8>U5 U5-(55,68) T1-(10,30) T2-(22,30)
+3. {Free look — hit a regressing rusher} :1  U5@T2!~-20 T1-(12,20) T2-(24,20)

@@ -1,0 +1,9 @@
+[Id "single-ball"]
+[Play "Single Ball"]
+[Badge "4-ball offense"]
+[Call "\"Single ball\""]
+[Desc "Designate one player to throw a single ball while holding the other three for defense. Called to burn time off the clock or when we're down players."]
+DBF "U:1(14,90),2(24,90)*,3(35,90),4(45,90)*,5(55,90),6(65,90)*,7(76,90),8(86,90)* / T:1(14,10),2(24,10),3(35,10)*,4(45,10),5(55,10),6(65,10),7(76,10)*,8(86,10)"
+
+1. {Designate one thrower} :0.8  U6? U4?
+2. {Single ball — burn the clock} :1.1  U6@T5!~-18

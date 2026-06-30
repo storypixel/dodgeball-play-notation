@@ -1,0 +1,9 @@
+[Id "home"]
+[Play "Home"]
+[Badge "3-ball defense"]
+[Call "\"Home\""]
+[Desc "Same trigger as Away, but instead of rushing we hold: the player opposite the thrower counters straight back from the back line while the rest pump-fake."]
+DBF "U:1(14,90),2(24,90)*,3(35,90),4(45,90),5(55,90)*,6(65,90),7(76,90)*,8(86,90) / T:1(14,10),2(24,10)*,3(35,10),4(45,10),5(55,10),6(65,10)*,7(76,10),8(86,10)*"
+
+1. {Read the throw — hold the line} :0.9  U2? U5? U7?
+2. {Home — counter from the back line} :1  U5@T4!~-12

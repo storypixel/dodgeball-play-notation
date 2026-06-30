@@ -62,8 +62,8 @@
 .dbp__btn svg{width:15px;height:15px;fill:currentColor}
 .dbp__scrubwrap{position:relative;flex:1;display:flex;align-items:center}
 .dbp__scrub{flex:1;accent-color:${COL.us};cursor:pointer;height:4px;position:relative;z-index:1}
-.dbp__ticks{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:13px;pointer-events:none;z-index:0}
-.dbp__tick{position:absolute;top:0;width:2px;height:13px;margin-left:-1px;background:${COL.centerline};opacity:.75;border-radius:1px}
+.dbp__ticks{position:absolute;left:7px;right:7px;top:50%;transform:translateY(-50%);height:14px;pointer-events:none;z-index:2}
+.dbp__tick{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border:2px solid #e6e8ec;border-radius:50%;background:transparent;box-shadow:0 0 0 1.5px rgba(0,0,0,.5)}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dbp:focus{outline:none}
 .dbp:focus-visible{outline:2px solid ${COL.us};outline-offset:2px}
@@ -157,7 +157,15 @@
         const fa = actors.get(keyOf(th.from.team, th.from.n));
         if (fa) fa.balls = Math.max(0, fa.balls - 1);
         const ta = actors.get(keyOf(th.to.team, th.to.n));
-        if (ta) ta.out = true;
+        // outcome: dodged/blocked → nobody out; caught → the thrower is out;
+        // hit (!) or unresolved → the target is out
+        if (th.outcome === "dodged" || th.outcome === "blocked") {
+          /* live ball, nobody eliminated */
+        } else if (th.outcome === "caught") {
+          if (fa) fa.out = true;
+        } else if (ta) {
+          ta.out = true;
+        }
       });
       // a pass hands a ball from one teammate to another (no elimination)
       (st.passes || []).forEach((ps) => {
