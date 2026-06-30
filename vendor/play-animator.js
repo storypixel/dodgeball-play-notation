@@ -249,23 +249,22 @@
     });
     root.appendChild(stage);
 
-    // static court — a clean diagram board: dark frame, solid (no checker) court,
-    // file/rank coordinate labels, dashed center line.
+    // static court — a clean, full-bleed light board (no frame, no margin),
+    // file/rank coordinate labels, dashed center line spanning the full width.
     const court = svg("g", {});
-    court.appendChild(svg("rect", { x: 0, y: 0, width: VB_W, height: VB_H, fill: COL.frame }));
+    court.appendChild(svg("rect", { x: 0, y: 0, width: VB_W, height: VB_H, fill: COL.court }));
     const bx0 = px(0), by0 = py(0), bw = px(100) - px(0), bh = py(100) - py(0);
-    court.appendChild(svg("rect", { x: bx0, y: by0, width: bw, height: bh, fill: COL.court }));
     const COLS = 10, ROWS = 10, cw = bw / COLS, chh = bh / ROWS;
     // coordinate labels: files a–j across the bottom, ranks 1–10 down the left
     for (let cc = 0; cc < COLS; cc++) {
-      const lab = svg("text", { x: bx0 + (cc + 0.5) * cw, y: by0 + bh - 7, "font-size": 14, "font-weight": 700, "text-anchor": "middle", fill: COL.coord });
+      const lab = svg("text", { x: bx0 + (cc + 0.5) * cw, y: VB_H - 8, "font-size": 14, "font-weight": 700, "text-anchor": "middle", fill: COL.coord });
       lab.textContent = String.fromCharCode(97 + cc); court.appendChild(lab);
     }
     for (let r = 0; r < ROWS; r++) {
-      const lab = svg("text", { x: bx0 + 8, y: by0 + (r + 0.5) * chh + 5, "font-size": 14, "font-weight": 700, fill: COL.coord });
+      const lab = svg("text", { x: 6, y: by0 + (r + 0.5) * chh + 5, "font-size": 14, "font-weight": 700, fill: COL.coord });
       lab.textContent = String(ROWS - r); court.appendChild(lab);
     }
-    court.appendChild(svg("line", { x1: bx0, y1: py(50), x2: bx0 + bw, y2: py(50), stroke: COL.centerline, "stroke-width": 3, "stroke-dasharray": "11 9" }));
+    court.appendChild(svg("line", { x1: 0, y1: py(50), x2: VB_W, y2: py(50), stroke: COL.centerline, "stroke-width": 3, "stroke-dasharray": "11 9" }));
     stage.appendChild(court);
 
     const layer = svg("g", {});
