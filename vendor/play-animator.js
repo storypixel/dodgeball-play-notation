@@ -38,8 +38,8 @@
     us: "#111111",         // our team — solid black piece
     them: "#ffffff",       // their team — white piece, told apart by the dark outline
     ball: "#e23150",       // ball — red dot
-    court: "#e9edef",      // board light square
-    square: "#7e9aa7",     // board dark square — steel blue-grey (chess-diagram style)
+    court: "#eef1f4",      // board surface — solid light
+    coord: "#9aa7b0",      // file/rank coordinate labels — muted slate
     frame: "#34424b",      // board frame — dark slate
     line: "#34424b",       // court boundary / center line
     centerline: "#34424b", // halfway line, dashed
@@ -253,25 +253,20 @@
     });
     root.appendChild(stage);
 
-    // static court — a chess-diagram board: dark frame, a 10×10 checkerboard over
-    // the DBN grid (files a–j, ranks 1–10), coordinate labels, dashed center line.
+    // static court — a clean diagram board: dark frame, solid (no checker) court,
+    // file/rank coordinate labels, dashed center line.
     const court = svg("g", {});
     court.appendChild(svg("rect", { x: 0, y: 0, width: VB_W, height: VB_H, fill: COL.frame }));
     const bx0 = px(0), by0 = py(0), bw = px(100) - px(0), bh = py(100) - py(0);
+    court.appendChild(svg("rect", { x: bx0, y: by0, width: bw, height: bh, fill: COL.court }));
     const COLS = 10, ROWS = 10, cw = bw / COLS, chh = bh / ROWS;
-    const isDark = (r, cc) => ((r + cc) % 2) === 1;
-    for (let r = 0; r < ROWS; r++) {
-      for (let cc = 0; cc < COLS; cc++) {
-        court.appendChild(svg("rect", { x: bx0 + cc * cw, y: by0 + r * chh, width: cw + 0.6, height: chh + 0.6, fill: isDark(r, cc) ? COL.square : COL.court }));
-      }
-    }
-    // coordinate labels: files a–j across the bottom row, ranks 1–10 down the left
+    // coordinate labels: files a–j across the bottom, ranks 1–10 down the left
     for (let cc = 0; cc < COLS; cc++) {
-      const lab = svg("text", { x: bx0 + (cc + 1) * cw - 6, y: by0 + ROWS * chh - 7, "font-size": 15, "font-weight": 700, "text-anchor": "end", fill: isDark(ROWS - 1, cc) ? COL.court : COL.square, opacity: .9 });
+      const lab = svg("text", { x: bx0 + (cc + 0.5) * cw, y: by0 + bh - 7, "font-size": 14, "font-weight": 700, "text-anchor": "middle", fill: COL.coord });
       lab.textContent = String.fromCharCode(97 + cc); court.appendChild(lab);
     }
     for (let r = 0; r < ROWS; r++) {
-      const lab = svg("text", { x: bx0 + 6, y: by0 + r * chh + 17, "font-size": 15, "font-weight": 700, fill: isDark(r, 0) ? COL.court : COL.square, opacity: .9 });
+      const lab = svg("text", { x: bx0 + 8, y: by0 + (r + 0.5) * chh + 5, "font-size": 14, "font-weight": 700, fill: COL.coord });
       lab.textContent = String(ROWS - r); court.appendChild(lab);
     }
     court.appendChild(svg("line", { x1: bx0, y1: py(50), x2: bx0 + bw, y2: py(50), stroke: COL.centerline, "stroke-width": 3, "stroke-dasharray": "11 9" }));
@@ -334,7 +329,7 @@
     const ICON_REPLAY = '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>';
 
     let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0;
-    const DWELL_MS = 480; // hold this long at each beat node during playback
+    const DWELL_MS = 750; // hold this long at each beat node during playback
     const SPEED = (opts.speed || 2) * 1.0; // play-units per second; default 2x for realistic pace. Pass speed:1 for the old pace.
 
     function render() {
@@ -364,7 +359,7 @@
       // of the beat. The ball is quick (a throw is a snap); the players keep their
       // own, slower pace over the full beat. FLIGHT is in play-seconds, so it stays
       // fast regardless of how long the beat is.
-      const FLIGHT = 0.26;
+      const FLIGHT = 0.7;
       c.throws.forEach((th) => {
         const flight = Math.min(FLIGHT, th.t1 - th.t0);
         const rel = th.t1 - flight; // release moment — ball leaves the hand here
@@ -397,7 +392,7 @@
           g.appendChild(svg("line", { class: "dbp__outx", x1: X + 15, y1: Y - 15, x2: X - 15, y2: Y + 15, stroke: "#111111", "stroke-width": 4.5, "stroke-linecap": "round" }));
         }
         // held balls — one dot per ball; a ball mid-flight is already off the hand
-        const inFlight = c.throws.filter((th) => { const fl = Math.min(0.26, th.t1 - th.t0); return th.from === key && t >= th.t1 - fl && t < th.t1; }).length;
+        const inFlight = c.throws.filter((th) => { const fl = Math.min(0.7, th.t1 - th.t0); return th.from === key && t >= th.t1 - fl && t < th.t1; }).length;
         const held = Math.max(0, a.balls - inFlight);
         if (!a.out && held > 0) {
           const slots = [[22, -16], [22, 6]];
