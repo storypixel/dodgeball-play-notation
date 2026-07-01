@@ -280,7 +280,8 @@
     // controls — stacked under the court: [scrubber bar] then [play | next] bank.
     // A play is a SLIDESHOW of beats, not a video: play-through dwells at each node
     // and STOPS at the end (no loop); the scrubber drags to any point manually.
-    const ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
+    // skip-to-end glyph (triangle to a bar) — the right button jumps to the final frame
+    const ICON_END = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
 
     // scrubber bar sits directly under the court (square nodes, one per beat)
     const scrubEl = document.createElement("div");
@@ -289,12 +290,12 @@
     scrubEl.innerHTML = '<div class="dbp__track"><div class="dbp__fill"></div><div class="dbp__thumb"></div></div>';
     root.appendChild(scrubEl);
 
-    // button bank: wide play-through (2/3) + next-beat (1/3)
+    // button bank: wide play-a-beat (2/3) + skip-to-end (1/3)
     const ctrls = document.createElement("div");
     ctrls.className = "dbp__ctrls";
     ctrls.innerHTML =
-      '<button class="dbp__btn dbp__play" aria-label="Play through"></button>' +
-      '<button class="dbp__btn dbp__next" aria-label="Next beat">' + ICON_NEXT + '</button>';
+      '<button class="dbp__btn dbp__play" aria-label="Play beat"></button>' +
+      '<button class="dbp__btn dbp__next" aria-label="Skip to end">' + ICON_END + '</button>';
     root.appendChild(ctrls);
 
     const stepLine = document.createElement("div");
@@ -463,6 +464,8 @@
       for (const b of bounds) { if (b > t + eps) { nxt = b; break; } }
       stopAt = nxt; play_();
     }
+    // jump straight to the final frame of the play
+    function goToEnd() { stopAt = null; pause(); setT(c.totalDur); updateBtn(); }
     // advance one slide: play the next beat's motion and stop at its end
     function nextBeat() {
       const eps = 1e-4;
@@ -482,7 +485,7 @@
     function replay() { stopAt = null; setT(0); playAll(); }
 
     playBtn.addEventListener("click", () => (playing ? pause() : playAll()));
-    nextBtn.addEventListener("click", nextBeat);
+    nextBtn.addEventListener("click", goToEnd);
 
     // scrubber: drag anywhere on the track to seek to that point
     function seekFromEvent(e) {
