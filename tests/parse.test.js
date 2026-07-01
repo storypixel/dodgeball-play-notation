@@ -61,9 +61,9 @@ for (const file of examples) {
 
 // headless path: pure-Node JSON + static SVG, no DOM
 const headless = require("../src/dbn-headless.js");
-const sample = fs.readFileSync(path.join(root, "examples", "kill-left.dbn"), "utf8");
+const sample = fs.readFileSync(path.join(root, "examples", "home.dbn"), "utf8");
 const json = headless.toJSON(sample);
-assert.ok(json.includes('"id":"kill-left"'), "headless toJSON produces play JSON");
+assert.ok(json.includes('"id":"home"'), "headless toJSON produces play JSON");
 const svg = headless.toSetupSVG(sample);
 assert.ok(svg.startsWith("<svg") && svg.includes("</svg>"), "headless toSetupSVG produces an SVG");
 assert.ok(svg.includes("THEM") && svg.includes("US"), "SVG labels both sides");
