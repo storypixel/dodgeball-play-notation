@@ -2,8 +2,8 @@
 [Play "Home"]
 [Badge "defense"]
 [Call "\"Home\""]
-[Desc "Pre-counter: the designated player throws from their current position at a target of their choosing, releasing before or as the other team throws."]
-DBF "U:1(8,90),2(20,90),3(32,90)*,4(44,90),5(56,90)*,6(68,90),7(80,90)*,8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10),5(56,10)*,6(68,10),7(80,10),8(92,10)*"
+[Desc "They have the balls and bring them up to the line to attack. Pre-counter: the designated defender reads the throw and releases first — from their own position — hitting the thrower before their ball lands."]
+DBF "U:1(8,90),2(20,90),3(32,90),4(44,90)*,5(56,90)*,6(68,90),7(80,90),8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10)*,5(56,10),6(68,10)*,7(80,10),8(92,10)*"
 
-1. {Set at the line — read the throw} :0.9  U3-(32,66) U3? U5-(56,64) U7-(80,66) U7? T5?
-2. {Home — pre-counter beats their throw} :1  T5@U5%~14 U5@T5!~-12
+1. {They bring it up to the line} :1  T2-(20,44) T4-(44,44) T6-(68,44) T8-(92,44) T4?
+2. {Home — pre-counter beats their throw} :1  T4@U5%~14 U5@T4!~-12
