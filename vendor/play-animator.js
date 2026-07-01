@@ -447,15 +447,22 @@
     function updateBtn() {
       const atEnd = t >= c.totalDur;
       playBtn.innerHTML = playing ? ICON_PAUSE : (atEnd ? ICON_REPLAY : ICON_PLAY);
-      playBtn.setAttribute("aria-label", playing ? "Pause" : (atEnd ? "Restart" : "Play through"));
+      playBtn.setAttribute("aria-label", playing ? "Pause" : (atEnd ? "Restart" : "Play beat"));
     }
     function play_() {
       playing = true; lastTs = 0; dwellUntil = 0; updateBtn(); raf = requestAnimationFrame(frame);
     }
     function pause() { playing = false; cancelAnimationFrame(raf); updateBtn(); }
 
-    // play through all remaining beats, then stop at the end
-    function playAll() { stopAt = null; if (t >= c.totalDur) t = 0; play_(); }
+    // play the current beat's motion and STOP at the next node. A play is a
+    // slideshow: each press advances one beat and stops; it does not run through.
+    function playAll() {
+      const eps = 1e-4;
+      if (t >= c.totalDur - eps) t = 0; // at the end → restart from the top
+      let nxt = c.totalDur;
+      for (const b of bounds) { if (b > t + eps) { nxt = b; break; } }
+      stopAt = nxt; play_();
+    }
     // advance one slide: play the next beat's motion and stop at its end
     function nextBeat() {
       const eps = 1e-4;
