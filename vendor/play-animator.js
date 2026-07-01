@@ -60,27 +60,21 @@
 .dbp__desc{padding:0 13px 9px;color:#555;font-size:.85rem}
 .dbp__stage{display:block;width:100%;height:auto;background:${COL.court};touch-action:none}
 .dbp__court{position:relative;line-height:0}
-.dbp__overlay{position:absolute;inset:0;display:grid;place-items:center;border:0;padding:0;margin:0;width:100%;height:100%;background:rgba(17,20,24,.22);cursor:pointer;transition:opacity .18s ease;opacity:1}
-.dbp__overlay--hidden{opacity:0;pointer-events:none}
-.dbp__ovbtn{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.94);display:grid;place-items:center;box-shadow:0 4px 16px rgba(10,15,25,.3);transition:transform .12s ease}
-.dbp__overlay:hover .dbp__ovbtn{transform:scale(1.06)}
-.dbp__ovbtn svg{width:30px;height:30px;fill:#111}
-.dbp__ovbtn--play svg{margin-left:4px}
-.dbp__stepline{padding:9px 13px 0;font-size:.8rem;color:#555;min-height:1.2em}
-.dbp__ctrls{display:flex;align-items:center;gap:10px;padding:7px 13px 11px}
-.dbp__btn{appearance:none;border:1px solid #d4d4d4;background:#fff;color:#111;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;flex:none}
-.dbp__btn:hover{background:#f2f2f2}
-.dbp__btn svg{width:15px;height:15px;fill:currentColor}
-.dbp__play{width:44px;height:44px}
-.dbp__play svg{width:19px;height:19px}
-/* slideshow scrubber — draggable progress track with a node per beat.
-   fill / thumb / nodes all sit on the one track so they always line up. */
-.dbp__scrub{flex:1;position:relative;height:22px;display:flex;align-items:center;cursor:pointer;padding-left:4px;touch-action:none}
-.dbp__track{position:relative;width:100%;height:5px;border-radius:999px;background:#d9dde3}
-.dbp__fill{position:absolute;left:0;top:0;height:100%;width:0;border-radius:999px;background:#111}
-.dbp__node{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border:2px solid #b9bec4;border-radius:50%;background:#fff;pointer-events:none}
+/* the panel stacks under the court: [scrubber bar] then [play | next] bank,
+   so the bar is sandwiched cleanly between the court and the buttons. */
+.dbp__scrub{position:relative;height:26px;display:flex;align-items:center;cursor:pointer;padding:0 13px;touch-action:none}
+.dbp__track{position:relative;width:100%;height:6px;background:#d9dde3}
+.dbp__fill{position:absolute;left:0;top:0;height:100%;width:0;background:#111}
+.dbp__node{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border:2px solid #b9bec4;background:#fff;pointer-events:none}
 .dbp__node--on{background:#111;border-color:#111}
-.dbp__thumb{position:absolute;top:50%;left:0;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:#111;box-shadow:0 1px 3px rgba(20,30,50,.35);pointer-events:none}
+.dbp__thumb{position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;background:#111;box-shadow:0 1px 3px rgba(20,30,50,.35);pointer-events:none}
+.dbp__ctrls{display:flex;gap:8px;padding:8px 13px 11px}
+.dbp__btn{appearance:none;border:1px solid #d4d4d4;background:#fff;color:#111;border-radius:8px;height:46px;display:grid;place-items:center;cursor:pointer}
+.dbp__btn:hover{background:#f2f2f2}
+.dbp__btn svg{width:20px;height:20px;fill:currentColor}
+.dbp__play{flex:2}
+.dbp__next{flex:1}
+.dbp__stepline{padding:4px 13px 0;font-size:.8rem;color:#555;min-height:1.2em}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dbp:focus{outline:none}
 .dbp:focus-visible{outline:2px solid #111;outline-offset:2px}
@@ -257,7 +251,6 @@
       class: "dbp__stage", viewBox: `0 0 ${VB_W} ${VB_H}`,
       role: "img", "aria-label": (play.name || "Dodgeball play") + " animation",
     });
-    // court sits in a positioned wrapper so a play-button overlay can sit on top
     const courtWrap = document.createElement("div");
     courtWrap.className = "dbp__court";
     courtWrap.appendChild(stage);
@@ -284,26 +277,30 @@
     const layer = svg("g", {});
     stage.appendChild(layer);
 
-    // controls
+    // controls — stacked under the court: [scrubber bar] then [play | next] bank.
+    // A play is a SLIDESHOW of beats, not a video: play-through dwells at each node
+    // and STOPS at the end (no loop); the scrubber drags to any point manually.
+    const ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
+
+    // scrubber bar sits directly under the court (square nodes, one per beat)
+    const scrubEl = document.createElement("div");
+    scrubEl.className = "dbp__scrub";
+    scrubEl.setAttribute("aria-label", "Scrub through the play");
+    scrubEl.innerHTML = '<div class="dbp__track"><div class="dbp__fill"></div><div class="dbp__thumb"></div></div>';
+    root.appendChild(scrubEl);
+
+    // button bank: wide play-through (2/3) + next-beat (1/3)
+    const ctrls = document.createElement("div");
+    ctrls.className = "dbp__ctrls";
+    ctrls.innerHTML =
+      '<button class="dbp__btn dbp__play" aria-label="Play through"></button>' +
+      '<button class="dbp__btn dbp__next" aria-label="Next beat">' + ICON_NEXT + '</button>';
+    root.appendChild(ctrls);
+
     const stepLine = document.createElement("div");
     stepLine.className = "dbp__stepline";
     stepLine.innerHTML = '<span class="dbp__step"></span>';
     root.appendChild(stepLine);
-
-    const ctrls = document.createElement("div");
-    ctrls.className = "dbp__ctrls";
-    const ICON_PREV = '<svg viewBox="0 0 24 24"><path d="M6 6h2.2v12H6zm12 0v12l-8.4-6z"/></svg>';
-    const ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
-    // a play is a SLIDESHOW of beats, not a video: prev / play-through / next,
-    // plus a scrubber with one node per beat. Play-through dwells at each node and
-    // STOPS at the end (no loop); the scrubber lets you drag to any point manually.
-    ctrls.innerHTML =
-      '<button class="dbp__btn dbp__prev" aria-label="Previous beat">' + ICON_PREV + '</button>' +
-      '<button class="dbp__btn dbp__play" aria-label="Play through"></button>' +
-      '<button class="dbp__btn dbp__next" aria-label="Next beat">' + ICON_NEXT + '</button>' +
-      '<div class="dbp__scrub" aria-label="Scrub through the play"><div class="dbp__track">' +
-      '<div class="dbp__fill"></div><div class="dbp__thumb"></div></div></div>';
-    root.appendChild(ctrls);
 
     const hint = document.createElement("div");
     hint.className = "dbp__hint";
@@ -311,12 +308,10 @@
     root.appendChild(hint);
 
     const playBtn = ctrls.querySelector(".dbp__play");
-    const prevBtn = ctrls.querySelector(".dbp__prev");
     const nextBtn = ctrls.querySelector(".dbp__next");
-    const scrubEl = ctrls.querySelector(".dbp__scrub");
-    const trackEl = ctrls.querySelector(".dbp__track");
-    const fillEl = ctrls.querySelector(".dbp__fill");
-    const thumbEl = ctrls.querySelector(".dbp__thumb");
+    const trackEl = scrubEl.querySelector(".dbp__track");
+    const fillEl = scrubEl.querySelector(".dbp__fill");
+    const thumbEl = scrubEl.querySelector(".dbp__thumb");
     const stepEl = stepLine.querySelector(".dbp__step");
 
     // beat boundaries: [0, end-of-beat-1, …, totalDur]. One node per beat (slide),
@@ -333,16 +328,6 @@
     const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
     const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
     const ICON_REPLAY = '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>';
-
-    // big play button overlaid on the court, over a slight dark scrim; shows while
-    // paused/stopped, fades out during playback (updateBtn toggles it).
-    const overlay = document.createElement("button");
-    overlay.className = "dbp__overlay";
-    overlay.type = "button";
-    overlay.setAttribute("aria-label", "Play");
-    overlay.innerHTML = '<span class="dbp__ovbtn dbp__ovbtn--play">' + ICON_PLAY + "</span>";
-    courtWrap.appendChild(overlay);
-    const ovIcon = overlay.querySelector(".dbp__ovbtn");
 
     let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0, stopAt = null;
     const DWELL_MS = 750; // hold this long at each beat node during playback
@@ -463,11 +448,6 @@
       const atEnd = t >= c.totalDur;
       playBtn.innerHTML = playing ? ICON_PAUSE : (atEnd ? ICON_REPLAY : ICON_PLAY);
       playBtn.setAttribute("aria-label", playing ? "Pause" : (atEnd ? "Restart" : "Play through"));
-      // court overlay: visible only when not playing; shows replay glyph at the end
-      overlay.classList.toggle("dbp__overlay--hidden", playing);
-      ovIcon.innerHTML = atEnd ? ICON_REPLAY : ICON_PLAY;
-      ovIcon.classList.toggle("dbp__ovbtn--play", !atEnd);
-      overlay.setAttribute("aria-label", atEnd ? "Replay" : "Play");
     }
     function play_() {
       playing = true; lastTs = 0; dwellUntil = 0; updateBtn(); raf = requestAnimationFrame(frame);
@@ -495,10 +475,7 @@
     function replay() { stopAt = null; setT(0); playAll(); }
 
     playBtn.addEventListener("click", () => (playing ? pause() : playAll()));
-    prevBtn.addEventListener("click", prevBeat);
     nextBtn.addEventListener("click", nextBeat);
-    // overlay click starts (or replays) the play
-    overlay.addEventListener("click", () => (t >= c.totalDur ? replay() : playAll()));
 
     // scrubber: drag anywhere on the track to seek to that point
     function seekFromEvent(e) {
