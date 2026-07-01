@@ -103,7 +103,7 @@
   }
 
   function loadExample(id) {
-    return fetch("examples/" + id + ".dbn?v=84ff462a05")
+    return fetch("examples/" + id + ".dbn?v=eced030209")
       .then(function (r) { if (!r.ok) throw new Error("not found"); return r.text(); })
       .then(function (txt) {
         load(txt);

@@ -69,11 +69,10 @@
 .dbp__node--on{background:#111;border-color:#111}
 .dbp__thumb{position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;background:#111;box-shadow:0 1px 3px rgba(20,30,50,.35);pointer-events:none}
 .dbp__ctrls{display:flex;gap:8px;padding:8px 13px 11px}
-.dbp__btn{appearance:none;border:1px solid #d4d4d4;background:#fff;color:#111;border-radius:8px;height:46px;display:grid;place-items:center;cursor:pointer}
+.dbp__btn{appearance:none;border:1px solid #d4d4d4;background:#fff;color:#111;border-radius:8px;height:46px;display:grid;place-items:center;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .dbp__btn:hover{background:#f2f2f2}
-.dbp__btn svg{width:20px;height:20px;fill:currentColor}
-.dbp__play{flex:2}
-.dbp__next{flex:1}
+.dbp__btn svg{width:20px;height:20px;fill:currentColor;pointer-events:none}
+.dbp__play{flex:1}
 .dbp__stepline{padding:4px 13px 0;font-size:.8rem;color:#555;min-height:1.2em}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dbp:focus{outline:none}
@@ -280,9 +279,6 @@
     // controls — stacked under the court: [scrubber bar] then [play | next] bank.
     // A play is a SLIDESHOW of beats, not a video: play-through dwells at each node
     // and STOPS at the end (no loop); the scrubber drags to any point manually.
-    // plain ">" chevron — the right button jumps to the final frame
-    const ICON_END = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
     // scrubber bar sits directly under the court (square nodes, one per beat)
     const scrubEl = document.createElement("div");
     scrubEl.className = "dbp__scrub";
@@ -290,12 +286,10 @@
     scrubEl.innerHTML = '<div class="dbp__track"><div class="dbp__fill"></div><div class="dbp__thumb"></div></div>';
     root.appendChild(scrubEl);
 
-    // button bank: wide play-a-beat (2/3) + skip-to-end (1/3)
+    // single full-width play button: each press advances one beat and stops
     const ctrls = document.createElement("div");
     ctrls.className = "dbp__ctrls";
-    ctrls.innerHTML =
-      '<button class="dbp__btn dbp__play" aria-label="Play beat"></button>' +
-      '<button class="dbp__btn dbp__next" aria-label="Skip to end">' + ICON_END + '</button>';
+    ctrls.innerHTML = '<button class="dbp__btn dbp__play" aria-label="Play beat"></button>';
     root.appendChild(ctrls);
 
     const stepLine = document.createElement("div");
@@ -309,7 +303,6 @@
     root.appendChild(hint);
 
     const playBtn = ctrls.querySelector(".dbp__play");
-    const nextBtn = ctrls.querySelector(".dbp__next");
     const trackEl = scrubEl.querySelector(".dbp__track");
     const fillEl = scrubEl.querySelector(".dbp__fill");
     const thumbEl = scrubEl.querySelector(".dbp__thumb");
@@ -464,8 +457,6 @@
       for (const b of bounds) { if (b > t + eps) { nxt = b; break; } }
       stopAt = nxt; play_();
     }
-    // jump straight to the final frame of the play
-    function goToEnd() { stopAt = null; pause(); setT(c.totalDur); updateBtn(); }
     // advance one slide: play the next beat's motion and stop at its end
     function nextBeat() {
       const eps = 1e-4;
@@ -485,7 +476,6 @@
     function replay() { stopAt = null; setT(0); playAll(); }
 
     playBtn.addEventListener("click", () => (playing ? pause() : playAll()));
-    nextBtn.addEventListener("click", goToEnd);
 
     // scrubber: drag anywhere on the track to seek to that point
     function seekFromEvent(e) {
