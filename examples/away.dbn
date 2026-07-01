@@ -2,9 +2,9 @@
 [Play "Away"]
 [Badge "defense"]
 [Call "\"Away\""]
-[Desc "They have the balls and attack the line first. We respond aggressively: our ball-holders charge the center line to meet them and the designated player counters whoever just threw."]
+[Desc "They have the balls and attack the line first. When they throw we respond by rushing them: as they retreat off the line, our ball-holders surge forward and counter the thrower on the run."]
 DBF "U:1(8,90),2(20,90),3(32,90),4(44,90)*,5(56,90)*,6(68,90),7(80,90),8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10)*,5(56,10),6(68,10)*,7(80,10),8(92,10)*"
 
 1. {They bring it up to the line} :1  T2-(20,44) T4-(44,44) T6-(68,44) T8-(92,44) T4?
-2. {They throw — we charge to meet} :1  T4@U2%~14 U4-(44,56) U5-(56,56)
-3. {Away — counter the thrower} :1  U5@T4!~-12
+2. {They throw} :0.9  T4@U2%~14
+3. {We rush as they retreat — and counter} :1.2  U4-(44,54) U5-(56,54) T2-(20,26) T4-(44,26) T6-(68,26) T8-(92,26) U5@T4!~-12
