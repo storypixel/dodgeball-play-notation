@@ -5,5 +5,5 @@
 [Desc "Pre-counter: the designated player throws from their current position at a target of their choosing, releasing before or as the other team throws."]
 DBF "U:1(8,90),2(20,90),3(32,90)*,4(44,90),5(56,90)*,6(68,90),7(80,90)*,8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10),5(56,10)*,6(68,10),7(80,10),8(92,10)*"
 
-1. {Ball-holders step to the line} :0.9  U3-(32,66) U3? U5-(56,64) U7-(80,66) U7?
-2. {Home — pre-counter from the line} :0.9  U5@T5!~-12
+1. {They load up to throw} :0.9  U3-(32,66) U3? U5-(56,64) U7-(80,66) U7? T5?
+2. {Home — pre-counter, we release first} :0.9  U5@T5!~-12

@@ -212,11 +212,11 @@
     return {
       x: lerp(a.x, b.x, e),
       y: lerp(a.y, b.y, e),
-      // ball count holds the entering-step value; it advances to the next step's
-      // value exactly at the boundary (t >= seg.t1 rolls i forward above), which
-      // keeps held-dot rendering aligned with the half-open moving-ball intervals
-      // so a ball is never both a held dot and a moving ball in the same frame.
-      balls: a.balls,
+      // ball count holds the entering-step value, but flips to the resolved
+      // (post-throw) value at the beat boundary — same as `out` below. Without
+      // this, at the final beat's end (where the slideshow stops) the count is
+      // stuck pre-throw and the thrown ball "replenishes" in the hand.
+      balls: t >= seg.t1 - 1e-6 ? b.balls : a.balls,
       out: t >= seg.t1 - 1e-6 ? b.out : a.out,
       fake: a.fake,
       team: key.split("-")[0],

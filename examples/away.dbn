@@ -5,5 +5,5 @@
 [Desc "All ball-holders charge the center line and the designated player throws at a target — usually whoever just threw."]
 DBF "U:1(8,90),2(20,90)*,3(32,90),4(44,90),5(56,90)*,6(68,90),7(80,90)*,8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10)*,5(56,10),6(68,10),7(80,10),8(92,10)*"
 
-1. {They throw — charge the line} :1  U2-(20,54) U5-(56,54) U7-(80,54)
-2. {Designated throws the thrower} :1  U5@T5!~-16
+1. {They throw — we charge the line} :1.1  T4@U5%~-14 U2-(20,54) U5-(56,54) U7-(80,54)
+2. {Away — counter the thrower} :1  U5@T4!~-16
