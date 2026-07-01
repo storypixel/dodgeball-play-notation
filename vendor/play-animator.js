@@ -280,8 +280,8 @@
     // controls — stacked under the court: [scrubber bar] then [play | next] bank.
     // A play is a SLIDESHOW of beats, not a video: play-through dwells at each node
     // and STOPS at the end (no loop); the scrubber drags to any point manually.
-    // skip-to-end glyph (triangle to a bar) — the right button jumps to the final frame
-    const ICON_END = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
+    // plain ">" chevron — the right button jumps to the final frame
+    const ICON_END = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
     // scrubber bar sits directly under the court (square nodes, one per beat)
     const scrubEl = document.createElement("div");
