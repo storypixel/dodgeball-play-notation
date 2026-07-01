@@ -59,6 +59,13 @@
 .dbp__call{color:#555;font-size:.85rem}
 .dbp__desc{padding:0 13px 9px;color:#555;font-size:.85rem}
 .dbp__stage{display:block;width:100%;height:auto;background:${COL.court};touch-action:none}
+.dbp__court{position:relative;line-height:0}
+.dbp__overlay{position:absolute;inset:0;display:grid;place-items:center;border:0;padding:0;margin:0;width:100%;height:100%;background:rgba(17,20,24,.22);cursor:pointer;transition:opacity .18s ease;opacity:1}
+.dbp__overlay--hidden{opacity:0;pointer-events:none}
+.dbp__ovbtn{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.94);display:grid;place-items:center;box-shadow:0 4px 16px rgba(10,15,25,.3);transition:transform .12s ease}
+.dbp__overlay:hover .dbp__ovbtn{transform:scale(1.06)}
+.dbp__ovbtn svg{width:30px;height:30px;fill:#111}
+.dbp__ovbtn--play svg{margin-left:4px}
 .dbp__stepline{padding:9px 13px 0;font-size:.8rem;color:#555;min-height:1.2em}
 .dbp__ctrls{display:flex;align-items:center;gap:10px;padding:7px 13px 11px}
 .dbp__btn{appearance:none;border:1px solid #d4d4d4;background:#fff;color:#111;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;flex:none}
@@ -66,11 +73,14 @@
 .dbp__btn svg{width:15px;height:15px;fill:currentColor}
 .dbp__play{width:44px;height:44px}
 .dbp__play svg{width:19px;height:19px}
-/* slideshow beat dots — one per beat, current one filled */
-.dbp__dots{flex:1;display:flex;align-items:center;gap:9px;padding-left:6px;flex-wrap:wrap}
-.dbp__dot{width:11px;height:11px;padding:0;appearance:none;border:2px solid #b9bec4;border-radius:50%;background:#fff;cursor:pointer;flex:none}
-.dbp__dot:hover{border-color:#111}
-.dbp__dot--on{background:#111;border-color:#111}
+/* slideshow scrubber — draggable progress track with a node per beat.
+   fill / thumb / nodes all sit on the one track so they always line up. */
+.dbp__scrub{flex:1;position:relative;height:22px;display:flex;align-items:center;cursor:pointer;padding-left:4px;touch-action:none}
+.dbp__track{position:relative;width:100%;height:5px;border-radius:999px;background:#d9dde3}
+.dbp__fill{position:absolute;left:0;top:0;height:100%;width:0;border-radius:999px;background:#111}
+.dbp__node{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border:2px solid #b9bec4;border-radius:50%;background:#fff;pointer-events:none}
+.dbp__node--on{background:#111;border-color:#111}
+.dbp__thumb{position:absolute;top:50%;left:0;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border-radius:50%;background:#111;box-shadow:0 1px 3px rgba(20,30,50,.35);pointer-events:none}
 .dbp__step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .dbp:focus{outline:none}
 .dbp:focus-visible{outline:2px solid #111;outline-offset:2px}
@@ -247,7 +257,11 @@
       class: "dbp__stage", viewBox: `0 0 ${VB_W} ${VB_H}`,
       role: "img", "aria-label": (play.name || "Dodgeball play") + " animation",
     });
-    root.appendChild(stage);
+    // court sits in a positioned wrapper so a play-button overlay can sit on top
+    const courtWrap = document.createElement("div");
+    courtWrap.className = "dbp__court";
+    courtWrap.appendChild(stage);
+    root.appendChild(courtWrap);
 
     // static court — a clean, full-bleed light board (no frame, no margin),
     // file/rank coordinate labels, dashed center line spanning the full width.
@@ -281,12 +295,14 @@
     const ICON_PREV = '<svg viewBox="0 0 24 24"><path d="M6 6h2.2v12H6zm12 0v12l-8.4-6z"/></svg>';
     const ICON_NEXT = '<svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM6 6l8.4 6L6 18z"/></svg>';
     // a play is a SLIDESHOW of beats, not a video: prev / play-through / next,
-    // with one dot per beat. It advances and STOPS at the end (no loop, no scrub).
+    // plus a scrubber with one node per beat. Play-through dwells at each node and
+    // STOPS at the end (no loop); the scrubber lets you drag to any point manually.
     ctrls.innerHTML =
       '<button class="dbp__btn dbp__prev" aria-label="Previous beat">' + ICON_PREV + '</button>' +
       '<button class="dbp__btn dbp__play" aria-label="Play through"></button>' +
       '<button class="dbp__btn dbp__next" aria-label="Next beat">' + ICON_NEXT + '</button>' +
-      '<span class="dbp__dots" role="tablist"></span>';
+      '<div class="dbp__scrub" aria-label="Scrub through the play"><div class="dbp__track">' +
+      '<div class="dbp__fill"></div><div class="dbp__thumb"></div></div></div>';
     root.appendChild(ctrls);
 
     const hint = document.createElement("div");
@@ -297,24 +313,36 @@
     const playBtn = ctrls.querySelector(".dbp__play");
     const prevBtn = ctrls.querySelector(".dbp__prev");
     const nextBtn = ctrls.querySelector(".dbp__next");
-    const dotsEl = ctrls.querySelector(".dbp__dots");
+    const scrubEl = ctrls.querySelector(".dbp__scrub");
+    const trackEl = ctrls.querySelector(".dbp__track");
+    const fillEl = ctrls.querySelector(".dbp__fill");
+    const thumbEl = ctrls.querySelector(".dbp__thumb");
     const stepEl = stepLine.querySelector(".dbp__step");
 
-    // beat boundaries: [0, end-of-beat-1, …, totalDur]. One dot per beat (slide).
+    // beat boundaries: [0, end-of-beat-1, …, totalDur]. One node per beat (slide),
+    // placed on the track at the beat's start so nodes + thumb always align.
     const bounds = [0].concat(c.labels.map((l) => l.t1));
-    const beatDots = c.labels.map((l, i) => {
-      const dot = document.createElement("button");
-      dot.className = "dbp__dot";
-      dot.type = "button";
-      dot.setAttribute("aria-label", "Beat " + (i + 1) + (l.text ? ": " + l.text : ""));
-      dot.addEventListener("click", function () { stopAt = null; pause(); setT(l.t0); updateBtn(); });
-      dotsEl.appendChild(dot);
-      return dot;
+    const beatNodes = c.labels.map((l, i) => {
+      const node = document.createElement("div");
+      node.className = "dbp__node";
+      node.style.left = (100 * l.t0 / c.totalDur) + "%";
+      trackEl.appendChild(node);
+      return node;
     });
 
     const ICON_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
     const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
     const ICON_REPLAY = '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>';
+
+    // big play button overlaid on the court, over a slight dark scrim; shows while
+    // paused/stopped, fades out during playback (updateBtn toggles it).
+    const overlay = document.createElement("button");
+    overlay.className = "dbp__overlay";
+    overlay.type = "button";
+    overlay.setAttribute("aria-label", "Play");
+    overlay.innerHTML = '<span class="dbp__ovbtn dbp__ovbtn--play">' + ICON_PLAY + "</span>";
+    courtWrap.appendChild(overlay);
+    const ovIcon = overlay.querySelector(".dbp__ovbtn");
 
     let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0, stopAt = null;
     const DWELL_MS = 750; // hold this long at each beat node during playback
@@ -399,7 +427,10 @@
       stepEl.textContent = c.labels[cur]
         ? (cur + 1) + "/" + c.labels.length + (c.labels[cur].text ? " · " + c.labels[cur].text : "")
         : "";
-      beatDots.forEach((d, i) => d.classList.toggle("dbp__dot--on", i === cur));
+      beatNodes.forEach((d, i) => d.classList.toggle("dbp__node--on", i === cur));
+      const pct = c.totalDur > 0 ? 100 * t / c.totalDur : 0;
+      fillEl.style.width = pct + "%";
+      thumbEl.style.left = pct + "%";
     }
 
     function setT(nt) { t = Math.max(0, Math.min(c.totalDur, nt)); render(); }
@@ -429,8 +460,14 @@
       raf = requestAnimationFrame(frame);
     }
     function updateBtn() {
-      playBtn.innerHTML = playing ? ICON_PAUSE : (t >= c.totalDur ? ICON_REPLAY : ICON_PLAY);
-      playBtn.setAttribute("aria-label", playing ? "Pause" : (t >= c.totalDur ? "Restart" : "Play through"));
+      const atEnd = t >= c.totalDur;
+      playBtn.innerHTML = playing ? ICON_PAUSE : (atEnd ? ICON_REPLAY : ICON_PLAY);
+      playBtn.setAttribute("aria-label", playing ? "Pause" : (atEnd ? "Restart" : "Play through"));
+      // court overlay: visible only when not playing; shows replay glyph at the end
+      overlay.classList.toggle("dbp__overlay--hidden", playing);
+      ovIcon.innerHTML = atEnd ? ICON_REPLAY : ICON_PLAY;
+      ovIcon.classList.toggle("dbp__ovbtn--play", !atEnd);
+      overlay.setAttribute("aria-label", atEnd ? "Replay" : "Play");
     }
     function play_() {
       playing = true; lastTs = 0; dwellUntil = 0; updateBtn(); raf = requestAnimationFrame(frame);
@@ -460,6 +497,25 @@
     playBtn.addEventListener("click", () => (playing ? pause() : playAll()));
     prevBtn.addEventListener("click", prevBeat);
     nextBtn.addEventListener("click", nextBeat);
+    // overlay click starts (or replays) the play
+    overlay.addEventListener("click", () => (t >= c.totalDur ? replay() : playAll()));
+
+    // scrubber: drag anywhere on the track to seek to that point
+    function seekFromEvent(e) {
+      const r = trackEl.getBoundingClientRect();
+      const frac = r.width > 0 ? (e.clientX - r.left) / r.width : 0;
+      stopAt = null; setT(Math.max(0, Math.min(1, frac)) * c.totalDur); updateBtn();
+    }
+    let scrubbing = false;
+    scrubEl.addEventListener("pointerdown", (e) => {
+      scrubbing = true; pause();
+      try { scrubEl.setPointerCapture(e.pointerId); } catch (_) {}
+      seekFromEvent(e); e.preventDefault();
+    });
+    scrubEl.addEventListener("pointermove", (e) => { if (scrubbing) seekFromEvent(e); });
+    const endScrub = (e) => { scrubbing = false; try { scrubEl.releasePointerCapture(e.pointerId); } catch (_) {} };
+    scrubEl.addEventListener("pointerup", endScrub);
+    scrubEl.addEventListener("pointercancel", endScrub);
 
     // keyboard controls — scoped to THIS player (the listener is on root), so
     // typing in any input/textarea elsewhere on the page is never hijacked.
