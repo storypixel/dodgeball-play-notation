@@ -13,8 +13,9 @@ Take one play:
 
 ```
 [Play "Quick Demo"]
-DBF "U:1c1*,2d1 / T:1c10,2d10"
-1. {Throw} U1@T2!~-15
+[Players "2"]
+[Balls "U:1"]
+1. {Throw} U1@T2!
 ```
 
 ### A. Via deep link (`?dbn=`) — renders on page load
@@ -24,8 +25,9 @@ add `?autoplay=1` to start the animation.
 
 ```js
 const dbn = `[Play "Quick Demo"]
-DBF "U:1c1*,2d1 / T:1c10,2d10"
-1. {Throw} U1@T2!~-15`;
+[Players "2"]
+[Balls "U:1"]
+1. {Throw} U1@T2!`;
 const url = "https://iamnotsam.com/dodgeball-play-notation/"
           + "?dbn=" + encodeURIComponent(dbn) + "&autoplay=1";
 // open `url` in any browser / headless browser — done.
@@ -52,7 +54,7 @@ evaluate_script((dbn) => {
     svg:    window.DBNEditor.exportSVG(),     // current rendered <svg> markup
     errors: window.DBNEditor.getErrors(),     // [] when valid
   };
-}, /* args: */ ['[Play "Quick Demo"]\nDBF "U:1c1*,2d1 / T:1c10,2d10"\n1. {Throw} U1@T2!~-15'])
+}, /* args: */ ['[Play "Quick Demo"]\n[Players "2"]\n[Balls "U:1"]\n1. {Throw} U1@T2!'])
 ```
 
 Both produce the identical rendered play.

@@ -1,10 +1,9 @@
-[Id "pitch-back"]
 [Play "Pitch Back"]
 [Badge "opening rush"]
-[Call "\"Pitch back\""]
+[Call "Pitch back"]
 [Desc "Opening rush. The two right players grab our three center-line balls (one grabs two, one grabs one), then pitch one back to an attacker who steps up to mid-court and picks off a backpedaling rusher."]
-DBF "U:1(8,90),2(20,90),3(32,90),4(44,90),5(56,90),6(68,90),7(80,90),8(92,90) / T:1(8,10),2(20,10),3(32,10),4(44,10),5(56,10),6(68,10),7(80,10),8(92,10) / B:bU(80,50),bU(88,50),bU(96,50),bT(4,50),bT(12,50),bT(20,50)"
+[Setup "rush"]
 
-1. {Rush — the two on the right grab our three (2 + 1)} :1.3  U8-(92,54) U8*bU(88,50) U8*bU(96,50) U7-(80,54) U7*bU(80,50) T1-(8,46) T1*bT(4,50) T1*bT(12,50) T2-(20,46) T2*bT(20,50)
-2. {Pitch back — attacker steps up} :0.9  U8>U5 U5-(55,68) T1-(10,30) T2-(22,30)
-3. {Free look — hit a regressing rusher} :1  U5@T2!~-20 T1-(12,20) T2-(24,20)
+1. {Rush — the two on the right grab our three (2 + 1)} :1.3  U78-line U8*2 U7* T12-line T1*2 T2*
+2. {Pitch back — attacker steps up} :0.9  U8>U5 U5-68 T12-deep
+3. {Free look — hit a regressing rusher} :1  U5@T2! T12-back

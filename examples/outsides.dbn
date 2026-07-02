@@ -1,9 +1,8 @@
-[Id "outsides"]
 [Play "Outsides"]
 [Badge "4-ball offense"]
-[Call "\"Outsides on 4\""]
+[Call "Outsides on 4"]
 [Desc "Four-ball call. Both corners throw at the same number from opposite angles, so no single block covers both balls. The middle two hold."]
-DBF "U:1(8,90)*,2(20,90),3(32,90),4(44,90)*,5(56,90)*,6(68,90),7(80,90),8(92,90)* / T:1(8,10),2(20,10),3(32,10)*,4(44,10),5(56,10),6(68,10),7(80,10)*,8(92,10)"
+[Balls "U:1458 T:37"]
 
-1. {Ball-holders step up, middles fake} :0.9  U4-(44,66) U4? U5-(56,66) U5? U1-(8,62) U8-(92,62)
-2. {Outsides on 4} :1  U1@T4!~-20 U8@T4!~-30
+1. {Ball-holders step up, middles fake} :0.9  U45-mid U45? U18-mid
+2. {Outsides on 4} :1  U1@T4! U8@T4!

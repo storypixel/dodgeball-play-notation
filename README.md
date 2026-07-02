@@ -6,20 +6,23 @@ Deep-linkable, and built to be driven by an agent with zero human clicking.
 **▶ Live editor: https://iamnotsam.com/dodgeball-play-notation/**
 
 ```
-[Play "Kill Left"]
-[Call "\"Kill left on 3\""]
-DBF "U:1(14,90)*,2(22,90)*,3(30,90),...,9(78,90)*,10(86,90)* / T:1(14,10),...,4(38,10)*,...,7(62,10)*,..."
+[Play "Home"]
+[Badge "defense"]
+[Call "Home"]
+[Balls "U:45 T:2468"]
 
-1. {Set — fakes} :0.8  U5? U6? U7?
-2. {Kill left on 3} :1.1  U1@T3!~-26 U2@T3!~-18
+1. {They bring it up to the line} :1  T2468-line T4?
+2. {Home — pre-counter beats their throw} :1  T4@U5% U5@T4!
 ```
 
-→ the two left-side throwers commit to the same target while three players pump-fake.
+→ the default setup is implied (back lines, one player per lane); the play
+states only who's loaded and what happens. Read it aloud and it's a coach
+talking.
 
 ## What this is
 
-DBN is a compact, chess/PGN-style notation for a dodgeball play: a one-line
-**DBF** setup string + numbered **movetext** beats. It compiles to the JSON the
+DBN is a compact, chess-style notation for a dodgeball play: a few tags and
+numbered **movetext** beats. It compiles to the JSON the
 [dodgeball-play-animator][engine] renders. This repo is the **standalone
 editor** on top of canonical DBN — it does not define the notation.
 
@@ -55,7 +58,7 @@ step beats, R replay. Agents can also drive playback via
 ## Try it locally
 
 ```bash
-python3 -m http.server 8770
+npm run serve                # python3 -m http.server 8770 (on demand — no daemon)
 open http://localhost:8770/index.html
 node tests/parse.test.js     # parity + headless smoke tests
 ```
@@ -77,13 +80,19 @@ node tests/parse.test.js     # parity + headless smoke tests
 
 ## Notation, in one screen
 
-- **Court**: files `a`–`j` left→right, ranks `1`–`10` bottom→top (rank 1 = our
-  back line). `(x,y)` escapes give raw 0–100 coords when you need off-grid.
-- **Pieces**: `U1`…`U10` (us), `T1`…`T10` (them), `*` = holding a ball.
-- **DBF**: `U:… / T:… / B:…` — both teams and loose balls in one line.
+- **Court**: each player owns a **lane**; destinations are named depths —
+  `line` / `mid` / `deep` / `back` — from each team's own point of view.
+  Escapes: a bare number is an exact depth in your lane (`U5-68`); `(x,y)` is
+  a fixed point.
+- **Pieces**: `U1`…`Un` (us), `T1`…`Tn` (them). Run digits together to fan an
+  action across a group: `T2468-line`, `U45?`.
+- **Setup**: implied (back lines). `[Balls "U:45 T:2468"]` says who's loaded;
+  `[Setup "rush"]` is the opening; explicit `DBF "…"` remains for arbitrary
+  positions.
 - **Beats**: `1. {label} :dur  <actions>` — actions in a beat are simultaneous.
-- **Actions**: run `U3-f6`, grab `U9*`, pass `U10>U6`, throw `U1@T3!` (`~-20`
-  for arc), fake `U3?`, plus block/catch/dodge/out.
+- **Actions**: run `U3-line`, grab `U9*` (or `U9*2` for two), run+grab
+  `U8-line*2`, pass `U8>U5`, throw `U1@T3!`, fake `U3?`, plus
+  block/catch/dodge/out. Curves are automatic (`~deg` overrides).
 
 Full reference: [`NOTATION.md`](NOTATION.md) · [`GLOSSARY.md`](GLOSSARY.md).
 

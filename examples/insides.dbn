@@ -1,9 +1,8 @@
-[Id "insides"]
 [Play "Insides"]
 [Badge "4-ball offense"]
-[Call "\"Insides on 5\""]
+[Call "Insides on 5"]
 [Desc "Four-ball call. The two middle players throw at the same number — here the 5th from the left. The corners hold the other two balls."]
-DBF "U:1(8,90)*,2(20,90),3(32,90),4(44,90)*,5(56,90)*,6(68,90),7(80,90),8(92,90)* / T:1(8,10),2(20,10),3(32,10)*,4(44,10),5(56,10),6(68,10),7(80,10)*,8(92,10)"
+[Balls "U:1458 T:37"]
 
-1. {Ball-holders step up, corners fake} :0.9  U1-(8,66) U1? U8-(92,66) U8? U4-(44,62) U5-(56,62)
-2. {Insides on 5} :1  U4@T5!~-22 U5@T5!~-14
+1. {Ball-holders step up, corners fake} :0.9  U18-mid U18? U45-mid
+2. {Insides on 5} :1  U4@T5! U5@T5!

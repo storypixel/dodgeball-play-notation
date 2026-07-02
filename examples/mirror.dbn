@@ -1,10 +1,9 @@
-[Id "mirror"]
 [Play "Mirror"]
 [Badge "defense"]
-[Call "\"Mirror\""]
+[Call "Mirror"]
 [Desc "They have the balls and set at the line to throw. Reaction: the defender directly opposite the thrower has the green light to throw straight back at them."]
-DBF "U:1(8,90),2(20,90),3(32,90),4(44,90)*,5(56,90)*,6(68,90),7(80,90),8(92,90) / T:1(8,10),2(20,10)*,3(32,10),4(44,10)*,5(56,10),6(68,10)*,7(80,10),8(92,10)*"
+[Balls "U:45 T:2468"]
 
-1. {They set at the line} :1  T2-(20,44) T4-(44,44) T6-(68,44) T8-(92,44) T4?
-2. {They throw} :0.9  T4@U4%~14
+1. {They set at the line} :1  T2468-line T4?
+2. {They throw} :0.9  T4@U4%
 3. {Mirror — opposite defender throws straight back} :1  U4@T4!
