@@ -1,0 +1,8 @@
+[Play "Kill Left"]
+[Badge "left kill"]
+[Call "Kill left on 2"]
+[Desc "The two left-side ball-holders both throw at one specified target while everyone else pump-fakes to freeze the defense. Here the two leftmost holders fire at their 2."]
+[Balls "U:3456"]
+
+1. {Set — fakes} :0.8  U56?
+2. {Kill left on 2} :1.1  U3@T2! U4@T2!

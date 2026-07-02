@@ -626,6 +626,314 @@
       }
     ]
   },
+  "kill-left": {
+    "id": "kill-left",
+    "name": "Kill Left",
+    "badge": "left kill",
+    "call": "\"Kill left on 2\"",
+    "desc": "The two left-side ball-holders both throw at one specified target while everyone else pump-fakes to freeze the defense. Here the two leftmost holders fire at their 2.",
+    "setup": {
+      "us": [
+        {
+          "n": 1,
+          "x": 8,
+          "y": 90,
+          "ball": false
+        },
+        {
+          "n": 2,
+          "x": 20,
+          "y": 90,
+          "ball": false
+        },
+        {
+          "n": 3,
+          "x": 32,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 4,
+          "x": 44,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 5,
+          "x": 56,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 6,
+          "x": 68,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 7,
+          "x": 80,
+          "y": 90,
+          "ball": false
+        },
+        {
+          "n": 8,
+          "x": 92,
+          "y": 90,
+          "ball": false
+        }
+      ],
+      "them": [
+        {
+          "n": 1,
+          "x": 8,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 2,
+          "x": 20,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 3,
+          "x": 32,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 4,
+          "x": 44,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 5,
+          "x": 56,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 6,
+          "x": 68,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 7,
+          "x": 80,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 8,
+          "x": 92,
+          "y": 10,
+          "ball": false
+        }
+      ],
+      "balls": []
+    },
+    "steps": [
+      {
+        "label": "Set — fakes",
+        "dur": 0.8,
+        "fakes": [
+          {
+            "team": "us",
+            "n": 5
+          },
+          {
+            "team": "us",
+            "n": 6
+          }
+        ]
+      },
+      {
+        "label": "Kill left on 2",
+        "dur": 1.1,
+        "throws": [
+          {
+            "from": {
+              "team": "us",
+              "n": 3
+            },
+            "to": {
+              "team": "them",
+              "n": 2
+            },
+            "curve": -12
+          },
+          {
+            "from": {
+              "team": "us",
+              "n": 4
+            },
+            "to": {
+              "team": "them",
+              "n": 2
+            },
+            "curve": 12
+          }
+        ]
+      }
+    ]
+  },
+  "kill-right": {
+    "id": "kill-right",
+    "name": "Kill Right",
+    "badge": "right kill",
+    "call": "\"Kill right on 7\"",
+    "desc": "The mirror of Kill Left: the two right-side ball-holders both throw at one specified target while everyone else pump-fakes. Here the two rightmost holders fire at their 7.",
+    "setup": {
+      "us": [
+        {
+          "n": 1,
+          "x": 8,
+          "y": 90,
+          "ball": false
+        },
+        {
+          "n": 2,
+          "x": 20,
+          "y": 90,
+          "ball": false
+        },
+        {
+          "n": 3,
+          "x": 32,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 4,
+          "x": 44,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 5,
+          "x": 56,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 6,
+          "x": 68,
+          "y": 90,
+          "ball": true
+        },
+        {
+          "n": 7,
+          "x": 80,
+          "y": 90,
+          "ball": false
+        },
+        {
+          "n": 8,
+          "x": 92,
+          "y": 90,
+          "ball": false
+        }
+      ],
+      "them": [
+        {
+          "n": 1,
+          "x": 8,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 2,
+          "x": 20,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 3,
+          "x": 32,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 4,
+          "x": 44,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 5,
+          "x": 56,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 6,
+          "x": 68,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 7,
+          "x": 80,
+          "y": 10,
+          "ball": false
+        },
+        {
+          "n": 8,
+          "x": 92,
+          "y": 10,
+          "ball": false
+        }
+      ],
+      "balls": []
+    },
+    "steps": [
+      {
+        "label": "Set — fakes",
+        "dur": 0.8,
+        "fakes": [
+          {
+            "team": "us",
+            "n": 3
+          },
+          {
+            "team": "us",
+            "n": 4
+          }
+        ]
+      },
+      {
+        "label": "Kill right on 7",
+        "dur": 1.1,
+        "throws": [
+          {
+            "from": {
+              "team": "us",
+              "n": 5
+            },
+            "to": {
+              "team": "them",
+              "n": 7
+            },
+            "curve": -12
+          },
+          {
+            "from": {
+              "team": "us",
+              "n": 6
+            },
+            "to": {
+              "team": "them",
+              "n": 7
+            },
+            "curve": 12
+          }
+        ]
+      }
+    ]
+  },
   "middle": {
     "id": "middle",
     "name": "Middle",
