@@ -45,6 +45,9 @@
     els.errorPanel && els.errorPanel.setAttribute("hidden", "");
     els.errorPanel && (els.errorPanel.textContent = "");
     try {
+      // stop the previous instance before remounting — otherwise its animation
+      // loop and document-level listeners outlive the DOM we're about to wipe
+      if (state.mount && state.mount.destroy) state.mount.destroy();
       els.stage.innerHTML = "";
       var host = document.createElement("div");
       els.stage.appendChild(host);
@@ -103,7 +106,7 @@
   }
 
   function loadExample(id) {
-    return fetch("examples/" + id + ".dbn?v=eced030209")
+    return fetch("examples/" + id + ".dbn?v=e0fd42fbc7")
       .then(function (r) { if (!r.ok) throw new Error("not found"); return r.text(); })
       .then(function (txt) {
         load(txt);
