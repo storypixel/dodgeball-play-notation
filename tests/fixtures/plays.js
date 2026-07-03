@@ -5,9 +5,9 @@
   "away": {
     "id": "away",
     "name": "Away",
-    "badge": "defense",
+    "badge": "3-ball defense",
     "call": "\"Away\"",
-    "desc": "They have the balls and attack the line first. When they throw we respond by rushing them: as they retreat off the line, our ball-holders surge forward and counter the thrower on the run.",
+    "desc": "We're holding three balls on defense. They attack the line first; when they throw we rush — as they retreat off the line, our three ball-holders surge forward and counter the thrower on the run.",
     "setup": {
       "us": [
         {
@@ -44,7 +44,7 @@
           "n": 6,
           "x": 68,
           "y": 90,
-          "ball": false
+          "ball": true
         },
         {
           "n": 7,
@@ -202,6 +202,14 @@
             ]
           },
           {
+            "team": "us",
+            "n": 6,
+            "to": [
+              68,
+              55
+            ]
+          },
+          {
             "team": "them",
             "n": 2,
             "to": [
@@ -252,9 +260,9 @@
   "home": {
     "id": "home",
     "name": "Home",
-    "badge": "defense",
+    "badge": "3-ball defense",
     "call": "\"Home\"",
-    "desc": "They have the balls and bring them up to the line to attack. Pre-counter: the designated defender reads the throw and releases first — from their own position — hitting the thrower before their ball lands.",
+    "desc": "We're holding three balls on defense. They bring their balls up to the line to attack; the designated defender reads the throw and pre-counters — releasing first, from their own position, to hit the thrower before their ball lands.",
     "setup": {
       "us": [
         {
@@ -291,7 +299,7 @@
           "n": 6,
           "x": 68,
           "y": 90,
-          "ball": false
+          "ball": true
         },
         {
           "n": 7,
@@ -1243,9 +1251,9 @@
   "mirror": {
     "id": "mirror",
     "name": "Mirror",
-    "badge": "defense",
+    "badge": "3-ball defense",
     "call": "\"Mirror\"",
-    "desc": "They have the balls and set at the line to throw. Reaction: the defender directly opposite the thrower has the green light to throw straight back at them.",
+    "desc": "We're holding three balls on defense. They set at the line to throw; the defender directly opposite the thrower has the green light. Our ball-holders step up to the line as the opposite defender fires straight back.",
     "setup": {
       "us": [
         {
@@ -1282,7 +1290,7 @@
           "n": 6,
           "x": 68,
           "y": 90,
-          "ball": false
+          "ball": true
         },
         {
           "n": 7,
@@ -1420,8 +1428,34 @@
         ]
       },
       {
-        "label": "Mirror — opposite defender throws straight back",
+        "label": "Mirror — our line steps up, opposite defender throws back",
         "dur": 1,
+        "moves": [
+          {
+            "team": "us",
+            "n": 4,
+            "to": [
+              44,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 5,
+            "to": [
+              56,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 6,
+            "to": [
+              68,
+              55
+            ]
+          }
+        ],
         "throws": [
           {
             "from": {

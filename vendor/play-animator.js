@@ -64,7 +64,7 @@
 .dbp__scrub{position:relative;height:26px;display:flex;align-items:center;cursor:pointer;padding:0 13px;touch-action:none}
 .dbp__track{position:relative;width:100%;height:6px;background:#d9dde3}
 .dbp__fill{position:absolute;left:0;top:0;height:100%;width:0;background:#111}
-.dbp__node{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border:2px solid #b9bec4;background:#fff;pointer-events:none}
+.dbp__node{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;border:2px solid #b9bec4;background:#fff;pointer-events:none;transition:background-color .3s ease,border-color .3s ease}
 .dbp__node--on{background:#111;border-color:#111}
 .dbp__thumb{position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;background:#111;box-shadow:0 1px 3px rgba(20,30,50,.35);pointer-events:none}
 .dbp__ctrls{display:flex;gap:8px;padding:8px 13px 11px}
