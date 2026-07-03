@@ -635,7 +635,7 @@
     "name": "Kill Left",
     "badge": "left kill",
     "call": "\"Kill left 2, 2\"",
-    "desc": "The two left-side ball-holders both throw at one specified target while everyone else pump-fakes to freeze the defense. Called as \"kill left <target>, <pump-fakes>\" — here the two leftmost holders fire at their 2 after two pump-fakes.",
+    "desc": "The two left-side ball-holders throw at one specified target after the whole line pump-fakes in unison. Called as \"kill left <target>, <pump-fakes>\" — here the two leftmost holders fire at their 2 on the count after two pump-fakes.",
     "setup": {
       "us": [
         {
@@ -741,8 +741,8 @@
     },
     "steps": [
       {
-        "label": "Ball-holders step to the line, right two fake ×2",
-        "dur": 1.1,
+        "label": "Step 1 — ball-holders step up to the line",
+        "dur": 0.9,
         "moves": [
           {
             "team": "us",
@@ -776,8 +776,22 @@
               55
             ]
           }
-        ],
+        ]
+      },
+      {
+        "label": "Step 2 — two pump-fakes in unison (freeze the defense)",
+        "dur": 1.2,
         "fakes": [
+          {
+            "team": "us",
+            "n": 3,
+            "reps": 2
+          },
+          {
+            "team": "us",
+            "n": 4,
+            "reps": 2
+          },
           {
             "team": "us",
             "n": 5,
@@ -791,8 +805,8 @@
         ]
       },
       {
-        "label": "Kill left on 2",
-        "dur": 1.1,
+        "label": "Step 3 — kill left on 2: the two left holders release",
+        "dur": 1,
         "throws": [
           {
             "from": {
@@ -825,7 +839,7 @@
     "name": "Kill Right",
     "badge": "right kill",
     "call": "\"Kill right 7, 2\"",
-    "desc": "The mirror of Kill Left: the two right-side ball-holders both throw at one specified target while everyone else pump-fakes. Called as \"kill right <target>, <pump-fakes>\" — here the two rightmost holders fire at their 7 after two pump-fakes.",
+    "desc": "The mirror of Kill Left: the two right-side ball-holders throw at one specified target after the whole line pump-fakes in unison. Called as \"kill right <target>, <pump-fakes>\" — here the two rightmost holders fire at their 7 on the count after two pump-fakes.",
     "setup": {
       "us": [
         {
@@ -931,8 +945,8 @@
     },
     "steps": [
       {
-        "label": "Ball-holders step to the line, left two fake ×2",
-        "dur": 1.1,
+        "label": "Step 1 — ball-holders step up to the line",
+        "dur": 0.9,
         "moves": [
           {
             "team": "us",
@@ -966,7 +980,11 @@
               55
             ]
           }
-        ],
+        ]
+      },
+      {
+        "label": "Step 2 — two pump-fakes in unison (freeze the defense)",
+        "dur": 1.2,
         "fakes": [
           {
             "team": "us",
@@ -977,12 +995,22 @@
             "team": "us",
             "n": 4,
             "reps": 2
+          },
+          {
+            "team": "us",
+            "n": 5,
+            "reps": 2
+          },
+          {
+            "team": "us",
+            "n": 6,
+            "reps": 2
           }
         ]
       },
       {
-        "label": "Kill right on 7",
-        "dur": 1.1,
+        "label": "Step 3 — kill right on 7: the two right holders release",
+        "dur": 1,
         "throws": [
           {
             "from": {
