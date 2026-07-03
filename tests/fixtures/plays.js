@@ -737,8 +737,42 @@
     },
     "steps": [
       {
-        "label": "Set — fakes",
-        "dur": 0.8,
+        "label": "Ball-holders step to the line, right two fake",
+        "dur": 0.9,
+        "moves": [
+          {
+            "team": "us",
+            "n": 3,
+            "to": [
+              32,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 4,
+            "to": [
+              44,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 5,
+            "to": [
+              56,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 6,
+            "to": [
+              68,
+              55
+            ]
+          }
+        ],
         "fakes": [
           {
             "team": "us",
@@ -891,8 +925,42 @@
     },
     "steps": [
       {
-        "label": "Set — fakes",
-        "dur": 0.8,
+        "label": "Ball-holders step to the line, left two fake",
+        "dur": 0.9,
+        "moves": [
+          {
+            "team": "us",
+            "n": 3,
+            "to": [
+              32,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 4,
+            "to": [
+              44,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 5,
+            "to": [
+              56,
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 6,
+            "to": [
+              68,
+              55
+            ]
+          }
+        ],
         "fakes": [
           {
             "team": "us",

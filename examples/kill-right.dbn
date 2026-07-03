@@ -4,5 +4,5 @@
 [Desc "The mirror of Kill Left: the two right-side ball-holders both throw at one specified target while everyone else pump-fakes. Here the two rightmost holders fire at their 7."]
 [Balls "U:3456"]
 
-1. {Set — fakes} :0.8  U34?
+1. {Ball-holders step to the line, left two fake} :0.9  U3456-line U34?
 2. {Kill right on 7} :1.1  U5@T7! U6@T7!
