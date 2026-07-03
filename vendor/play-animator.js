@@ -100,7 +100,7 @@
         actors.set(keyOf(team, a.n), {
           team, n: a.n, x: a.x, y: a.y,
           balls: a.balls != null ? a.balls : (a.ball ? 1 : 0),
-          out: false, fake: false,
+          out: false, fake: 0,
         })
       );
     seed("us", play.setup.us);
@@ -131,10 +131,11 @@
     steps.forEach((st) => {
       const dur = st.dur || 1;
       labels.push({ t0, t1: t0 + dur, text: st.label || "" });
-      // fakes are momentary flags for the duration of the step
+      // fakes are momentary flags for the duration of the step; the value is
+      // the pump-fake rep count (bare `?` = 1) so the renderer pulses N times.
       (st.fakes || []).forEach((f) => {
         const a = actors.get(keyOf(f.team, f.n));
-        if (a) a.fake = true;
+        if (a) a.fake = f.reps || 1;
       });
       // moves resolve by the END of the step
       (st.moves || []).forEach((mv) => {
@@ -193,7 +194,7 @@
       });
       // clear momentary fakes after recording the boundary
       states.push(snapshot());
-      actors.forEach((a) => (a.fake = false));
+      actors.forEach((a) => (a.fake = 0));
       t0 += dur;
     });
 
@@ -221,6 +222,7 @@
       balls: t >= seg.t1 - 1e-6 ? b.balls : a.balls,
       out: t >= seg.t1 - 1e-6 ? b.out : a.out,
       fake: a.fake,
+      fakePhase: Math.max(0, Math.min(1, local)), // raw beat progress, for pump timing
       team: key.split("-")[0],
       n: key.split("-")[1],
     };
@@ -379,9 +381,17 @@
         const inFlight = c.throws.filter((th) => { const fl = Math.min(0.7, th.t1 - th.t0); return th.from === key && t >= th.t1 - fl && t < th.t1; }).length;
         const held = Math.max(0, a.balls - inFlight);
         if (!a.out && held > 0) {
-          // a pump-fake jitters the held ball (faking the throw), the player is still
-          const fx = a.fake && playing ? Math.sin(t * 48) * 4 : 0;
-          const fy = a.fake && playing ? Math.cos(t * 41) * 3 : 0;
+          // a pump-fake COCKS the ball toward the target N times (the player
+          // stands still). `a.fake` is the rep count; each pump is a wind-up
+          // and thrust toward the far line, spaced evenly across the beat.
+          let fx = 0, fy = 0;
+          if (a.fake && playing) {
+            const reps = a.fake;
+            const pump = Math.sin(a.fakePhase * reps * Math.PI); // reps humps: 0→1→0 each pump
+            const toward = a.team === "us" ? -1 : 1;             // us shoot up-court, them down
+            fy = toward * Math.abs(pump) * 13;                   // thrust toward the far line
+            fx = pump * 3;                                        // slight cock to the side
+          }
           const slots = [[22, -16], [22, 6]];
           for (let h = 0; h < Math.min(held, slots.length); h++) {
             g.appendChild(svg("circle", { cx: X + slots[h][0] + fx, cy: Y + slots[h][1] + fy, r: 9, fill: COL.ball, stroke: "#8c1024", "stroke-width": 1.5 }));

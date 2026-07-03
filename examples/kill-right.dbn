@@ -1,8 +1,8 @@
 [Play "Kill Right"]
 [Badge "right kill"]
-[Call "Kill right on 7"]
-[Desc "The mirror of Kill Left: the two right-side ball-holders both throw at one specified target while everyone else pump-fakes. Here the two rightmost holders fire at their 7."]
+[Call "Kill right 7, 2"]
+[Desc "The mirror of Kill Left: the two right-side ball-holders both throw at one specified target while everyone else pump-fakes. Called as \"kill right <target>, <pump-fakes>\" — here the two rightmost holders fire at their 7 after two pump-fakes."]
 [Balls "U:3456"]
 
-1. {Ball-holders step to the line, left two fake} :0.9  U3456-line U34?
+1. {Ball-holders step to the line, left two fake ×2} :1.1  U3456-line U34?2
 2. {Kill right on 7} :1.1  U5@T7! U6@T7!

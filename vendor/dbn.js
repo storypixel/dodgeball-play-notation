@@ -584,8 +584,15 @@
         } else if (th.outcome === "#") {
           addSimple(acc, "blocks", th.target);
         }
-      } else if (op === "?") {
-        actors.forEach(function (player) { addSimple(acc, "fakes", player); });
+      } else if (op[0] === "?") {
+        // pump-fake, with an optional rep count: U3?2 = fake twice (part of the
+        // call, e.g. "kill left 2, 2" = target 2, two pump-fakes).
+        var fm = /^\?(\d*)$/.exec(op);
+        if (!fm) fail("bad fake token: " + tok);
+        var reps = fm[1] ? parseInt(fm[1], 10) : 1;
+        actors.forEach(function (player) {
+          acc.fakes.push({ team: player.team, n: player.n, reps: reps });
+        });
       } else if (op === "#") {
         actors.forEach(function (player) { addSimple(acc, "blocks", player); });
       } else if (op === "^") {
