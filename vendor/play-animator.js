@@ -315,7 +315,7 @@
     const ICON_PAUSE = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
     const ICON_REPLAY = '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>';
 
-    let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0, stopAt = null;
+    let playing = false, t = 0, raf = 0, lastTs = 0, dwellUntil = 0, stopAt = null, loopMode = false;
     const DWELL_MS = 750; // hold this long at each beat node during playback
     const SPEED = (opts.speed || 2) * 1.0; // play-units per second; default 2x for realistic pace. Pass speed:1 for the old pace.
 
@@ -433,8 +433,12 @@
       const node = bounds.find((b) => b > t + 1e-6 && b <= nt + 1e-6 && b < c.totalDur - 1e-6);
       if (node != null) { nt = node; dwellUntil = ts + DWELL_MS; }
       t = nt;
-      // it is a slideshow, not a video: it stops at the end, it does not loop
-      if (t >= c.totalDur) { t = c.totalDur; render(); pause(); updateBtn(); return; }
+      // slideshow default: stop at the end. loop() mode (used by the quiz) runs
+      // through continuously, dwelling at the end, then restarts from the top.
+      if (t >= c.totalDur) {
+        if (loopMode) { t = c.totalDur; render(); dwellUntil = ts + DWELL_MS * 1.5; t = 0; lastTs = ts; raf = requestAnimationFrame(frame); return; }
+        t = c.totalDur; render(); pause(); updateBtn(); return;
+      }
       render();
       raf = requestAnimationFrame(frame);
     }
@@ -446,7 +450,11 @@
     function play_() {
       playing = true; lastTs = 0; dwellUntil = 0; updateBtn(); raf = requestAnimationFrame(frame);
     }
-    function pause() { playing = false; cancelAnimationFrame(raf); updateBtn(); }
+    function pause() { playing = false; loopMode = false; cancelAnimationFrame(raf); updateBtn(); }
+
+    // play through ALL beats continuously and loop from the top — for the quiz,
+    // where you study a play on repeat. pause()/any other control cancels it.
+    function loop() { stopAt = null; loopMode = true; setT(0); play_(); }
 
     // play the current beat's motion and STOP at the next node. A play is a
     // slideshow: each press advances one beat and stops; it does not run through.
@@ -530,7 +538,7 @@
       if (root.parentNode) root.parentNode.removeChild(root);
     }
 
-    return { play: playAll, pause, seek: setT, next: nextBeat, prev: prevBeat, replay, destroy, el: root };
+    return { play: playAll, pause, seek: setT, next: nextBeat, prev: prevBeat, replay, loop, destroy, el: root };
   }
 
   function autoInit() {
