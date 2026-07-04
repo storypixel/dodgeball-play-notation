@@ -453,7 +453,7 @@
     "name": "Insides",
     "badge": "4-ball offense",
     "call": "\"Insides on 5\"",
-    "desc": "Four-ball call. The two middle players throw at the same number — here the 5th from the left. The corners hold the other two balls.",
+    "desc": "Four-ball call. The two middle players throw at the same number — here the 5th from the left — while the corners hold the other two balls and pump-fake to pull the block.",
     "setup": {
       "us": [
         {
@@ -559,7 +559,7 @@
     },
     "steps": [
       {
-        "label": "Ball-holders step up, corners fake",
+        "label": "Step 1 — ball-holders step up to the line",
         "dur": 0.9,
         "moves": [
           {
@@ -567,15 +567,7 @@
             "n": 1,
             "to": [
               8,
-              65
-            ]
-          },
-          {
-            "team": "us",
-            "n": 8,
-            "to": [
-              92,
-              65
+              55
             ]
           },
           {
@@ -583,7 +575,7 @@
             "n": 4,
             "to": [
               44,
-              65
+              55
             ]
           },
           {
@@ -591,10 +583,22 @@
             "n": 5,
             "to": [
               56,
-              65
+              55
+            ]
+          },
+          {
+            "team": "us",
+            "n": 8,
+            "to": [
+              92,
+              55
             ]
           }
-        ],
+        ]
+      },
+      {
+        "label": "Step 2 — corners pump-fake to pull the block",
+        "dur": 1.1,
         "fakes": [
           {
             "team": "us",
@@ -609,7 +613,7 @@
         ]
       },
       {
-        "label": "Insides on 5",
+        "label": "Step 3 — insides on 5: the two middles release",
         "dur": 1,
         "throws": [
           {
@@ -1476,7 +1480,7 @@
     "name": "Outsides",
     "badge": "4-ball offense",
     "call": "\"Outsides on 4\"",
-    "desc": "Four-ball call. Both corners throw at the same number from opposite angles, so no single block covers both balls. The middle two hold.",
+    "desc": "Four-ball call. Both corners throw at the same number from opposite angles, so no single block covers both balls, while the middle two hold and pump-fake to pull the block.",
     "setup": {
       "us": [
         {
@@ -1582,15 +1586,23 @@
     },
     "steps": [
       {
-        "label": "Ball-holders step up, middles fake",
+        "label": "Step 1 — ball-holders step up to the line",
         "dur": 0.9,
         "moves": [
+          {
+            "team": "us",
+            "n": 1,
+            "to": [
+              8,
+              55
+            ]
+          },
           {
             "team": "us",
             "n": 4,
             "to": [
               44,
-              65
+              55
             ]
           },
           {
@@ -1598,15 +1610,7 @@
             "n": 5,
             "to": [
               56,
-              65
-            ]
-          },
-          {
-            "team": "us",
-            "n": 1,
-            "to": [
-              8,
-              65
+              55
             ]
           },
           {
@@ -1614,10 +1618,14 @@
             "n": 8,
             "to": [
               92,
-              65
+              55
             ]
           }
-        ],
+        ]
+      },
+      {
+        "label": "Step 2 — middles pump-fake to pull the block",
+        "dur": 1.1,
         "fakes": [
           {
             "team": "us",
@@ -1632,7 +1640,7 @@
         ]
       },
       {
-        "label": "Outsides on 4",
+        "label": "Step 3 — outsides on 4: the two corners release",
         "dur": 1,
         "throws": [
           {
@@ -1961,7 +1969,7 @@
     "name": "3 Balls",
     "badge": "3-ball offense",
     "call": "\"meet in the middle\"",
-    "desc": "With three balls we meet in the middle and designate one or two throwers on a specific target. Non-throwers pump-fake.",
+    "desc": "With three balls we meet in the middle and step up to the line, then designate one or two throwers on a specific target. The odd man out pump-fakes.",
     "setup": {
       "us": [
         {
@@ -2067,7 +2075,7 @@
     },
     "steps": [
       {
-        "label": "Meet in the middle",
+        "label": "Step 1 — meet in the middle, step to the line",
         "dur": 0.9,
         "moves": [
           {
@@ -2075,7 +2083,7 @@
             "n": 4,
             "to": [
               48,
-              65
+              55
             ]
           },
           {
@@ -2083,7 +2091,7 @@
             "n": 5,
             "to": [
               56,
-              65
+              55
             ]
           },
           {
@@ -2091,13 +2099,24 @@
             "n": 6,
             "to": [
               64,
-              65
+              55
             ]
           }
         ]
       },
       {
-        "label": "Two throwers on 4",
+        "label": "Step 2 — the odd man pump-fakes",
+        "dur": 1.1,
+        "fakes": [
+          {
+            "team": "us",
+            "n": 6,
+            "reps": 1
+          }
+        ]
+      },
+      {
+        "label": "Step 3 — two throwers on 4",
         "dur": 1,
         "throws": [
           {
