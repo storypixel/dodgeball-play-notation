@@ -464,7 +464,7 @@
     "name": "Green Light",
     "badge": "designated thrower",
     "call": "\"Green Light, Jordan\"",
-    "desc": "One designated player has permission to throw at the target of their choosing. The call names that player; everyone holding a ball still steps up to the line together, but only the named player releases — the rest hold and protect the ball count. In this example Jordan is our 4 and picks her target from the line.",
+    "desc": "Everyone on offense holding a ball parlays and takes the line together, but only the green-lit player throws. The call names the thrower; everyone else advances as cover and holds their ball. In this example our ball-holders are 2, 4 and 6, and Jordan (our 4) is green-lit.",
     "setup": {
       "us": [
         {
@@ -570,9 +570,40 @@
     },
     "steps": [
       {
-        "label": "Green Light — everyone with a ball steps up",
+        "label": "Ball-holders parlay",
+        "summary": "parley: call play and choose target",
+        "dur": 0.8,
+        "moves": [
+          {
+            "team": "us",
+            "n": 2,
+            "to": [
+              43.5,
+              87
+            ]
+          },
+          {
+            "team": "us",
+            "n": 4,
+            "to": [
+              50,
+              87
+            ]
+          },
+          {
+            "team": "us",
+            "n": 6,
+            "to": [
+              56.5,
+              87
+            ]
+          }
+        ]
+      },
+      {
+        "label": "All ball-holders take the line together",
         "summary": "to the line",
-        "dur": 1,
+        "dur": 0.9,
         "moves": [
           {
             "team": "us",
@@ -601,7 +632,7 @@
         ]
       },
       {
-        "label": "The designated holder chooses the target and throws",
+        "label": "Only the green-lit player throws, the rest hold",
         "summary": "throw at 4",
         "dur": 1,
         "throws": [
