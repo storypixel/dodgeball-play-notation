@@ -42,6 +42,10 @@
     return JSON.stringify(parse(text), null, pretty ? 2 : 0);
   }
 
+  function checkConditions(playOrText, state) {
+    return getParser().checkConditions(typeof playOrText === "string" ? parse(playOrText) : playOrText, state);
+  }
+
   // ── deterministic static SVG of the starting setup ──
   // Mirrors the engine's court geometry so the snapshot lines up with the
   // animated view's first frame. Coords are 0..100 → a 1000×660 viewBox.
@@ -88,5 +92,5 @@
     ].join("");
   }
 
-  return { parse, toJSON, toSetupSVG };
+  return { parse, toJSON, toSetupSVG, checkConditions };
 });

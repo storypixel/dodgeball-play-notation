@@ -37,11 +37,11 @@ talking.
 DBN is a compact, chess-style notation for a dodgeball play: a few tags and
 numbered **movetext** beats. It compiles to the JSON the
 [dodgeball-play-animator][engine] renders. This repo is the **standalone
-editor** on top of canonical DBN — it does not define the notation.
+editor** and the canonical source of the current DBN parser and notation.
 
-- **DBN is canonical.** The spec ([`NOTATION.md`](NOTATION.md)) and parser
-  ([`vendor/dbn.js`](vendor/dbn.js)) are **vendored, not forked**, from the
-  [animator repo][engine]. Notation changes go there first, then re-vendor here.
+- **DBN is canonical here.** The spec ([`NOTATION.md`](NOTATION.md)) and parser
+  ([`vendor/dbn.js`](vendor/dbn.js)) evolve here. The [animator repo][engine]
+  carries a synced mirror; the `vendor/` path is retained for compatibility.
 - **The editor only drives the parser + engine** — it can never diverge from DBN.
 
 ## Agent-drivable (the point)
@@ -73,6 +73,28 @@ is right without ever opening a browser.
 2. **Window API** — `window.DBNEditor.{load, render, exportSVG, exportJSON, getErrors, getPlay, getText, isReady}`, callable via `evaluate_script`.
 3. **Pure-Node headless** — `require("./src/dbn-headless.js")` → `parse(text)`, `toJSON(text)`, `toSetupSVG(text)`.
 
+### Play prerequisites
+
+Optional DBN tags make requirements machine-readable without changing the
+illustrated lineup:
+
+```dbn
+[RequiresPlayers "U:4+ T:1-6"]
+[RequiresBalls "U:4 T:0-2"]
+[Burden "us"]
+[ThrowClock "3+"]
+[Blocking "allowed"]
+```
+
+`4`, `4+`, and `2-4` mean exact, minimum, and inclusive range counts.
+Ruleset, adaptation source, player advantage, and opponent-state tags are also
+supported. `DBN.checkConditions(play, state)` (or the headless wrapper) returns
+`matches: true`, `false`, or `null` for unknown required facts, with field reasons.
+It checks declared prerequisites, not full tournament legality. The existing
+eight-player default and all old play JSON are unchanged.
+See [the language spec](NOTATION.md#play-conditions) and
+[six-player training example](examples/conditions/cover-and-retreat.dbn).
+
 See **[DRIVING.md](DRIVING.md)** for copy-paste browser examples.
 
 Every control also carries a stable `data-testid` + ARIA label for browser
@@ -102,9 +124,9 @@ node tests/parse.test.js     # parity + headless smoke tests
 | `index.html` | playbook wiki shell, All Plays index, and play-page layout |
 | `src/editor.js` | wiki navigation, play metadata, editor wiring, and the `window.DBNEditor` automation API |
 | `src/dbn-headless.js` | pure-Node: DBN → play JSON + static setup SVG |
-| `vendor/dbn.js` | **canonical** DBN parser (vendored, do not edit) |
+| `vendor/dbn.js` | **canonical** DBN parser and condition checker |
 | `vendor/play-animator.js` | **canonical** render engine (vendored, do not edit) |
-| `NOTATION.md` | the DBN spec (synced from the animator repo) |
+| `NOTATION.md` | the canonical DBN spec |
 | `GLOSSARY.md` | every DBN token and what it means |
 | `DRIVING.md` | driving the editor programmatically |
 | `examples/*.dbn` | worked plays — each parses byte-identical to the engine's goldens |
