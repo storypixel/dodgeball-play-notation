@@ -34,8 +34,8 @@
     throw new Error("DBN parser not loaded (vendor/dbn.js)");
   }
 
-  function parse(text) {
-    return getParser().parse(text);
+  function parse(text, options) {
+    return getParser().parse(text, options);
   }
 
   function toJSON(text, pretty) {

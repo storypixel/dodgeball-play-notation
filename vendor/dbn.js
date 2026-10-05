@@ -987,19 +987,25 @@
     return step;
   }
 
-  function parseBeats(text, setup) {
+  function parseBeats(text, setup, options) {
     const chunks = beatChunks(text);
+    if (options.maxSteps && chunks.length > options.maxSteps)
+      fail("preview supports up to " + options.maxSteps + " steps");
     const ctx = runtimeFor(setup);
     return chunks.map(function (chunk) {
       return parseBeat(chunk, ctx);
     });
   }
 
-  function parse(text) {
+  function parse(text, options) {
+    options = options || {};
     if (typeof text !== "string") fail("input must be a string");
     const tagRead = readTags(text.replace(/\r\n?/g, "\n"));
     const dbfRead = readDbf(tagRead.rest);
     const tags = tagRead.tags;
+    // Browser importers can bound allocation before expanding an implied lineup.
+    if (dbfRead.dbf == null && options.maxPlayers && (parseInt(tags.players, 10) || 8) > options.maxPlayers)
+      fail("preview supports up to " + options.maxPlayers + " players per side");
     let setup;
     if (dbfRead.dbf != null) {
       setup = parseDbf(dbfRead.dbf);
@@ -1016,6 +1022,8 @@
     } else {
       setup = impliedSetup(tags);
     }
+    if (options.maxPlayers && (setup.us.length > options.maxPlayers || setup.them.length > options.maxPlayers))
+      fail("preview supports up to " + options.maxPlayers + " players per side");
     const name = tags.play || tags.name || tags.id || "Untitled Play";
     const play = {
       id: tags.id || slugify(name),
@@ -1035,7 +1043,7 @@
     const conditions = parseConditions(tags);
     if (Object.keys(conditions).length) play.conditions = conditions;
     play.setup = setup;
-    play.steps = parseBeats(dbfRead.rest, setup);
+    play.steps = parseBeats(dbfRead.rest, setup, options);
     return play;
   }
 
